@@ -48,12 +48,13 @@ class TNN_Network
     int convNum[layerNum];
     int poolSize[layerNum];
     const static int outputSize = 10;
-    int minibatch_size = 10;
-    int num_epochs = 20;
+//    int minibatch_size = 10;
+//    int num_epochs = 20;
     
     network<sequential> nn;
-    
-    
+    bool flag_load = false;
+    bool flag_save = false;
+        
   public:
     TNN_Network();
     ~TNN_Network();
@@ -61,6 +62,7 @@ class TNN_Network
     void show_net();
     bool weight_save(string& tnn_fileName);
     bool weight_load(string& tnn_fileName);
+    void layer_save(string& path);
 };
 
 
@@ -111,10 +113,12 @@ bool TNN_Network::weight_save(string& tnn_fileName)
   {
     outFile << nn;
     outFile.close();
+    flag_save = true;
     return true;
   }
   else 
   {
+    flag_save = false;
     return false;
   }
 }
@@ -126,11 +130,30 @@ bool TNN_Network::weight_load(string& tnn_fileName)
   {
     inFile >> nn;
     inFile.close();
+    flag_load = true;
     return true;
   }
   else 
   {
+    flag_load = false;
     return false;
+  }
+}
+
+void TNN_Network::layer_save(string& path)
+{     
+// save outputs of each layer  
+  for (size_t i = 0; i < nn.depth(); i++) 
+  {
+      auto out_img = nn[i]->output_to_image();
+      auto filename = path + "layer_" + std::to_string(i) + ".png";
+      out_img.save(filename);
+  }
+  // save filter shape of first convolutional layer
+  {
+      auto weight = nn.at<convolutional_layer<tan_h>>(0).weight_to_image();
+      auto filename = path + "weights.png";
+      weight.save(filename);
   }
 }
 
