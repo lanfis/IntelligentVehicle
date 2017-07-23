@@ -10,8 +10,8 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 #include <vector>
-#include "tiny_dnn/tiny_dnn.h"
-#include "tiny_dnn/layers/layers.h"
+#include "TNN/tiny-dnn/tiny_dnn/tiny_dnn.h"
+#include "TNN/tiny-dnn/tiny_dnn/layers/layers.h"
 
 using namespace std;
 using namespace cv;
@@ -43,7 +43,7 @@ class TNN_Network
 {
   public:
     const static int imgInputSize = 32;
-    const static int layerNum = 4;
+    const static int layerNum = 2;
     int convSize[layerNum];
     int convNum[layerNum];
     int poolSize[layerNum];
@@ -62,16 +62,20 @@ class TNN_Network
     void show_net();
     bool weight_save(string& tnn_fileName);
     bool weight_load(string& tnn_fileName);
-    void layer_save(string& path);
+//    void layer_save(string& path);
 };
 
 
 
 TNN_Network::TNN_Network()
 {
-  convSize[0] = 9; convSize[1] = 5; convSize[2] = 5; convSize[3] = 3;
-  convNum[0] = 20; convNum[1] = 40; convNum[2] = 80; convNum[3] = 160;
-  poolSize[0] = 1; poolSize[1] = 2; poolSize[2] = 1; poolSize[3] = 2;
+  convSize[0] = 5; convSize[1] = 5;
+  convNum[0] = 10; convNum[1] = 20;
+  poolSize[0] = 2; poolSize[1] = 2;
+}
+
+TNN_Network::~TNN_Network()
+{
 }
 
 void TNN_Network::construct_net()
@@ -139,7 +143,7 @@ bool TNN_Network::weight_load(string& tnn_fileName)
     return false;
   }
 }
-
+/*
 void TNN_Network::layer_save(string& path)
 {     
 // save outputs of each layer  
@@ -156,5 +160,5 @@ void TNN_Network::layer_save(string& path)
       weight.save(filename);
   }
 }
-
+*/
 #endif

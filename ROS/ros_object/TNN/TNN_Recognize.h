@@ -7,8 +7,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <vector>
-#include "tiny_dnn/tiny_dnn.h"
-#include "tiny_dnn/layers/layers.h"
+#include "TNN/tiny-dnn/tiny_dnn/tiny_dnn.h"
+#include "TNN/tiny-dnn/tiny_dnn/layers/layers.h"
 
 using namespace std;
 using namespace cv;
@@ -28,8 +28,7 @@ using namespace boost::filesystem;
 
 #include "TNN_Network.h"
 class TNN_Network;
-
-
+/*
 // rescale output to 0-100
 template <typename Activation>
 double rescale(double x) {
@@ -45,15 +44,17 @@ cv::Mat image2mat(image& img) {
     cv::resize(ori, resized, cv::Size(), 3, 3, cv::INTER_AREA);
     return resized;
 }
-
+*/
 
 class TNN_Recognize
 {
   public:
     string working_directory = "/TNN_WORK_SPACE";
-    string tnn_fileName = working_directory + "/mem";
+    string tnn_fileName;// = working_directory + "/mem";
 
     timer t;
+    int label;
+    double accuracy;
 
   private:
     TNN_Network *nn_;
@@ -72,13 +73,15 @@ class TNN_Recognize
     void construct_net();
     bool weight_load();
     bool run(Mat& img);
+    void working_directory_set(string path);
 };
 
 TNN_Recognize::TNN_Recognize()
 {
     nn_ = new TNN_Network;
-    construct_net();
-    weight_load();
+//    construct_net();
+    working_directory_set(working_directory);
+//    weight_load();
 }
 
 TNN_Recognize::~TNN_Recognize()
@@ -91,8 +94,10 @@ bool TNN_Recognize::weight_load()
   return nn_ -> weight_load(tnn_fileName);
 }
 
-TNN_Recognize::construct_net()
+void TNN_Recognize::construct_net()
 {
+    delete nn_;
+    nn_ = new TNN_Network;
     nn_ -> construct_net();
 }
 
@@ -101,13 +106,13 @@ bool TNN_Recognize::run(Mat& img)
   if(!nn_ -> flag_load) return false;
   cvtColor(img, img_gray, CV_BGR2GRAY);
   recognize_image_.clear();
-  if(!convert_image(img_gray, minv, maxv, imgInputSize, imgInputSize, recognize_image_))
+  if(!convert_image(img_gray, minv, maxv, nn_ -> imgInputSize, nn_ -> imgInputSize, recognize_image_))
   {
     return false;
   }
   
   t.restart();
-  vec_t res = nn_.predict(recognize_image_);
+  vec_t res = nn_ -> nn.predict(recognize_image_);
   vector<pair<double, int> > scores;
 
   // sort & print top-3
@@ -115,9 +120,12 @@ bool TNN_Recognize::run(Mat& img)
       scores.emplace_back(rescale<tan_h>(res[i]), i);
 
   sort(scores.begin(), scores.end(), greater<pair<double, int>>());
-
+  label = scores[0].first;
+  accuracy = scores[0].second;
+/*
   for (int i = 0; i < 3; i++)
       cout << scores[i].second << "," << scores[i].first << endl;
+*/
   return true;
 }
 
@@ -138,6 +146,16 @@ bool TNN_Recognize::convert_image(Mat& img, double minv, double maxv, int w, int
 }
 
 
+void TNN_Recognize::working_directory_set(string path)
+{
+  boost::filesystem::path path_curt = current_path();
+  working_directory = path_curt.string() + path;
+  boost::filesystem::path dir(working_directory.c_str());
+  if(!is_directory(dir))
+    boost::filesystem::create_directories(dir);
+
+  tnn_fileName = working_directory + "/mem";
+}
 
 
 #endif

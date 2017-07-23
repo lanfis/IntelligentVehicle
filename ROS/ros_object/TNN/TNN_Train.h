@@ -7,7 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <vector>
-#include "tiny_dnn/tiny_dnn.h"
+#include "TNN/tiny-dnn/tiny_dnn/tiny_dnn.h"
 
 using namespace std;
 using namespace cv;
@@ -27,7 +27,7 @@ using namespace boost::filesystem;
 
 #include "TNN_Network.h"
 class TNN_Network;
-
+/*
 // rescale output to 0-100
 template <typename Activation>
 double rescale(double x) {
@@ -43,15 +43,15 @@ cv::Mat image2mat(image& img) {
     cv::resize(ori, resized, cv::Size(), 3, 3, cv::INTER_AREA);
     return resized;
 }
-
+*/
 class TNN_Train
 {
   public:
     string working_directory = "/TNN_WORK_SPACE";
-    string tnn_fileName = working_directory + "/mem";
+    string tnn_fileName;// = working_directory + "/mem";
 
-    string data_dir_path = working_directory + "/MNIST/";
-//    string train_data_list = working_directory + "/data_list.txt";
+    string data_dir_path;// = working_directory + "/MNIST/";
+    string train_data_list;// = working_directory + "/data_list.txt";
     int minibatch_size = 10;
     int num_epochs = 20;
     timer t;
@@ -90,22 +90,24 @@ class TNN_Train
     void mnist_train_load();
     void mnist_test_load();
     bool training_data_fetch(string listFileName, double scale, int w, int h, vector<vec_t>& data, vector<label_t>& label);//not done
+    void working_directory_set(string path);
     void run();
 };
 
 TNN_Train::TNN_Train()
 {
   nn_ = new TNN_Network;
-  construct_net();
+//  construct_net();
+  working_directory_set(working_directory);
+//  weight_load();
     
   train_image_.clear();
   train_label_.clear();
   test_image_.clear();
   test_label_.clear();
 //  training_data_list_ = tnn_train_data_list;
-  weight_load();
-  mnist_train_load();
-  mnist_test_load();
+//  mnist_train_load();
+//  mnist_test_load();
 }
 
 TNN_Train::~TNN_Train()
@@ -116,6 +118,8 @@ TNN_Train::~TNN_Train()
 
 void TNN_Train::construct_net()
 {   
+  delete nn_;
+  nn_ = new TNN_Network;
   nn_ -> construct_net();
 }
 
@@ -246,6 +250,19 @@ void TNN_Train::mnist_test_load()
 {
   tiny_dnn::parse_mnist_labels(data_dir_path + "t10k-labels.idx1-ubyte", &test_label_);  
   tiny_dnn::parse_mnist_images(data_dir_path + "t10k-images.idx3-ubyte", &test_image_, -1.0, 1.0, 2, 2);  
+}
+
+void TNN_Train::working_directory_set(string path)
+{
+  boost::filesystem::path path_curt = current_path();
+  working_directory = path_curt.string() + path;
+  boost::filesystem::path dir(working_directory.c_str());
+  if(!is_directory(dir))
+    boost::filesystem::create_directories(dir);
+
+  tnn_fileName = working_directory + "/mem";
+  data_dir_path = working_directory + "/MNIST/";
+  train_data_list = working_directory + "/data_list.txt";
 }
 
 #endif
