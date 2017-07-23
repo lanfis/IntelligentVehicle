@@ -1,9 +1,0 @@
-Input		32
-Output 		10
-
-layerNum	4
-conv1		9	conv2		5	conv3	5	conv4	3
-convN		20	convN		40	convN	80	convN	160
-pool		1	pool		2	pool	1	pool	2
-minibatch_size 	10
-epochs 		20
