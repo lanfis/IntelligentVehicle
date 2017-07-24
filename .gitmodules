@@ -1,0 +1,3 @@
+[submodule "ROS/ros_object/TNN/tiny-dnn"]
+	path = ROS/ros_object/TNN/tiny-dnn
+	url = https://github.com/tiny-dnn/tiny-dnn.git
