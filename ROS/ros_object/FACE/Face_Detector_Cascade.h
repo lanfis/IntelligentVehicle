@@ -9,21 +9,26 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
+using namespace boost::filesystem;
 
 using namespace std;
 using namespace cv;
 
-
-const string fullbody_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_fullbody.xml";
-const string upperbody_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_upperbody.xml";
-const string face_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_frontalface_alt.xml";
-const string eyesplit_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_lefteye_2splits.xml";
-const string smile_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_smile.xml";
-const string eyeglass_cascade_name = "/home/adel/opencv/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+const string static_path = "/../ROS/ros_object/FACE/data";
 
 class Face_Detector_Cascade
 {
   private:
+    string data_directory = "/haarcascades";
+    string fullbody_cascade_name = "/haarcascade_fullbody.xml";
+    string upperbody_cascade_name = "/haarcascade_upperbody.xml";
+    string face_cascade_name = "/haarcascade_frontalface_alt.xml";
+    string eyesplit_cascade_name = "/haarcascade_lefteye_2splits.xml";
+    string smile_cascade_name = "/haarcascade_smile.xml";
+    string eyeglass_cascade_name = "/haarcascade_eye_tree_eyeglasses.xml";
+	
     CascadeClassifier fullbody_cascade;
     CascadeClassifier upperbody_cascade;
     CascadeClassifier face_cascade;
@@ -53,6 +58,18 @@ class Face_Detector_Cascade
 
 Face_Detector_Cascade::Face_Detector_Cascade()
 {
+  boost::filesystem::path path_curt = current_path();
+  data_directory = path_curt.string() + static_path + data_directory;
+  boost::filesystem::path dir(data_directory.c_str());
+  if(!is_directory(dir))
+    boost::filesystem::create_directories(dir);
+  fullbody_cascade_name = data_directory + fullbody_cascade_name;
+  upperbody_cascade_name = data_directory + upperbody_cascade_name;
+  face_cascade_name = data_directory + face_cascade_name;
+  eyesplit_cascade_name = data_directory + eyesplit_cascade_name;
+  smile_cascade_name = data_directory + smile_cascade_name;
+  eyeglass_cascade_name = data_directory + eyeglass_cascade_name;
+
   if( !fullbody_cascade.load( fullbody_cascade_name ) ){ cout << "Error loading "<< fullbody_cascade_name << "\n";};
   if( !upperbody_cascade.load( upperbody_cascade_name ) ){ cout << "Error loading "<< upperbody_cascade_name << "\n";};
   if( !face_cascade.load( face_cascade_name ) ){ cout << "Error loading "<< face_cascade_name << "\n";};
