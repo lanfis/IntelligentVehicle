@@ -1,15 +1,9 @@
 [submodule "ROS/ros_object/TNN/tiny-dnn"]
 	path = ROS/ros_object/TNN/tiny-dnn
 	url = https://github.com/tiny-dnn/tiny-dnn.git
-[submodule "ros_iv/src/async_web_server_cpp"]
-	path = ros_iv/src/async_web_server_cpp
-	url = https://github.com/GT-RAIL/async_web_server_cpp.git
 [submodule "ros_iv/src/web_video_server"]
 	path = ros_iv/src/web_video_server
 	url = https://github.com/RobotWebTools/web_video_server.git
 [submodule "ros_iv/src/rosserial"]
 	path = ros_iv/src/rosserial
 	url = https://github.com/ros-drivers/rosserial.git
-[submodule "ros_iv/src/iai_kinect2"]
-	path = ros_iv/src/iai_kinect2
-	url = https://github.com/code-iai/iai_kinect2.git
