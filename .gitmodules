@@ -3,7 +3,7 @@
 	url = https://github.com/tiny-dnn/tiny-dnn.git
 [submodule "ros_iv/src/async_web_server_cpp"]
 	path = ros_iv/src/async_web_server_cpp
-	url = "https://github.com/GT-RAIL/async_web_server_cpp.git"
+	url = https://github.com/GT-RAIL/async_web_server_cpp.git
 [submodule "ros_iv/src/web_video_server"]
 	path = ros_iv/src/web_video_server
 	url = https://github.com/RobotWebTools/web_video_server.git
