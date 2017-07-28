@@ -117,7 +117,7 @@ bool TNN_Recognize::run(Mat& img)
 
   // sort & print top-3
   for (int i = 0; i < res.size(); i++)
-      scores.emplace_back(rescale<tan_h>(res[i]), i);
+      scores.emplace_back(rescale<tanh_layer>(res[i]), i);
 
   sort(scores.begin(), scores.end(), greater<pair<double, int>>());
   label = scores[0].first;

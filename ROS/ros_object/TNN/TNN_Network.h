@@ -87,15 +87,20 @@ void TNN_Network::construct_net()
   for(int i = 0; i < layerNum; i++)
   {
     convOut = convNum[i];
-    nn << convolutional_layer<relu>(convIn, convIn, convSize[i], convSize[i], layNum, convOut);
+    nn << convolutional_layer(convIn, convIn, convSize[i], convSize[i], layNum, convOut) << relu_layer();
     poolIn = convIn - convSize[i] + 1;
-    nn << max_pooling_layer<identity>(poolIn, poolIn, convOut, poolSize[i]);
+    nn << max_pooling_layer(poolIn, poolIn, convOut, poolSize[i]) << tanh_layer();
     convIn = poolIn / poolSize[i];
     layNum = convOut;
   }
+  nn << fully_connected_layer(convIn * convIn * layNum, convIn * outputSize)
+     << fully_connected_layer(convIn * outputSize, outputSize);
+  ; 
+  /*
   nn << fully_connected_layer<identity>(convIn * convIn * layNum, convIn * outputSize)
      << fully_connected_layer<identity>(convIn * outputSize, outputSize);
   ; 
+  */
 }
 
 
