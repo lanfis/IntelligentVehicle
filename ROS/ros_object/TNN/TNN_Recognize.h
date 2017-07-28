@@ -112,7 +112,7 @@ bool TNN_Recognize::run(Mat& img)
   }
   
   t.restart();
-  vec_t res = nn_ -> nn.predict(recognize_image_);
+  auto res = nn_ -> nn.predict(recognize_image_);//vec_t
   vector<pair<double, int> > scores;
 
   // sort & print top-3

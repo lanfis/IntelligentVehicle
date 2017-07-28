@@ -62,7 +62,8 @@ class TNN_Network
     void show_net();
     bool weight_save(string& tnn_fileName);
     bool weight_load(string& tnn_fileName);
-//    void layer_save(string& path);
+    void layer_output_save(string& path);
+    void layer_weight_save(string& path);
 };
 
 
@@ -148,22 +149,35 @@ bool TNN_Network::weight_load(string& tnn_fileName)
     return false;
   }
 }
-/*
-void TNN_Network::layer_save(string& path)
+
+void TNN_Network::layer_output_save(string& path)
 {     
 // save outputs of each layer  
   for (size_t i = 0; i < nn.depth(); i++) 
   {
       auto out_img = nn[i]->output_to_image();
-      auto filename = path + "layer_" + std::to_string(i) + ".png";
+      auto filename = path + "/layer_" + std::to_string(i) + ".png";
       out_img.save(filename);
-  }
+  } 
+/*
   // save filter shape of first convolutional layer
+    {
+        auto weight = nn.at<convolutional_layer>(0).weight_to_image();
+        auto filename = "weights.png";
+        weight.save(filename);
+    }
+*/
+}
+
+void TNN_Network::layer_weight_save(string& path)
+{     
+  // save filter shape of first convolutional layer
+  for (size_t i = 0; i < nn.depth(); i++) 
   {
-      auto weight = nn.at<convolutional_layer<tan_h>>(0).weight_to_image();
-      auto filename = path + "weights.png";
+      auto weight = nn.at<convolutional_layer>(i).weight_to_image();
+      auto filename = path + "/layer_weights_" + std::to_string(i) + ".png";
       weight.save(filename);
   }
 }
-*/
+
 #endif
