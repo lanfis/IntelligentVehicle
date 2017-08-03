@@ -65,7 +65,7 @@ class TNN_Recognize
     label_t recognize_label_;
     
     Mat img_gray;
-    bool convert_image(Mat& img, double minv, double maxv, int w, int h, vec_t& data);
+    bool convert_image(Mat& img, double& minv, double& maxv, int w, int h, vec_t& data);
     
   public:
     TNN_Recognize();
@@ -79,6 +79,8 @@ class TNN_Recognize
 TNN_Recognize::TNN_Recognize()
 {
     nn_ = new TNN_Network;
+    minv = -1;
+    maxv = 1;
 //    construct_net();
     working_directory_set(working_directory);
 //    weight_load();
@@ -99,15 +101,18 @@ void TNN_Recognize::construct_net()
     delete nn_;
     nn_ = new TNN_Network;
     nn_ -> construct_net();
+    nn_ -> show_net();
 }
 
 bool TNN_Recognize::run(Mat& img)
 {
-  if(!nn_ -> flag_load) return false;
+  if(!nn_ -> flag_load)
+    return false;
   cvtColor(img, img_gray, CV_BGR2GRAY);
   recognize_image_.clear();
   if(!convert_image(img_gray, minv, maxv, nn_ -> imgInputSize, nn_ -> imgInputSize, recognize_image_))
   {
+    cout << "[TNN_Recognize] cannot convert image !\n";
     return false;
   }
   
@@ -120,17 +125,18 @@ bool TNN_Recognize::run(Mat& img)
       scores.emplace_back(rescale<tanh_layer>(res[i]), i);
 
   sort(scores.begin(), scores.end(), greater<pair<double, int>>());
-  label = scores[0].first;
-  accuracy = scores[0].second;
-/*
+  label = scores[0].second;
+  accuracy = scores[0].first;
+
   for (int i = 0; i < 3; i++)
       cout << scores[i].second << "," << scores[i].first << endl;
-*/
+  res.clear();
+  scores.clear();
   return true;
 }
 
 
-bool TNN_Recognize::convert_image(Mat& img, double minv, double maxv, int w, int h, vec_t& data)
+bool TNN_Recognize::convert_image(Mat& img, double& minv, double& maxv, int w, int h, vec_t& data)
 {
   if(img.data == nullptr)  return false;
   Mat_<uint8_t> resized;

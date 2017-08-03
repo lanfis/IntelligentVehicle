@@ -62,8 +62,10 @@ class TNN_Network
     void show_net();
     bool weight_save(string& tnn_fileName);
     bool weight_load(string& tnn_fileName);
+    #ifdef DNN_USE_IMAGE_API
     void layer_output_save(string& path);
     void layer_weight_save(string& path);
+    #endif
 };
 
 
@@ -90,12 +92,13 @@ void TNN_Network::construct_net()
     convOut = convNum[i];
     nn << convolutional_layer(convIn, convIn, convSize[i], convSize[i], layNum, convOut) << relu_layer();
     poolIn = convIn - convSize[i] + 1;
-    nn << max_pooling_layer(poolIn, poolIn, convOut, poolSize[i]) << tanh_layer();
+    nn << average_pooling_layer(poolIn, poolIn, convOut, poolSize[i]) << tanh_layer();
     convIn = poolIn / poolSize[i];
     layNum = convOut;
   }
   nn << fully_connected_layer(convIn * convIn * layNum, convIn * outputSize)
-     << fully_connected_layer(convIn * outputSize, outputSize);
+     << fully_connected_layer(convIn * outputSize, outputSize)
+	 << softmax_layer(outputSize)
   ; 
   /*
   nn << fully_connected_layer<identity>(convIn * convIn * layNum, convIn * outputSize)
@@ -150,6 +153,7 @@ bool TNN_Network::weight_load(string& tnn_fileName)
   }
 }
 
+#ifdef DNN_USE_IMAGE_API
 void TNN_Network::layer_output_save(string& path)
 {     
 // save outputs of each layer  
@@ -179,5 +183,6 @@ void TNN_Network::layer_weight_save(string& path)
       weight.save(filename);
   }
 }
+#endif
 
 #endif

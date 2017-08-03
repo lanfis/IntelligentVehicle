@@ -1,5 +1,7 @@
 <launch>
+  <node name="Camera" pkg="vision_system" type="camera" respawn="false" output="screen">
+  </node>
   <node name="tnn" pkg="tnn" type="tnn_recognize_node" respawn="false" output="screen">
-    <remap from="/TNN_Recognize_Node/image" to="/pic_sim/image_raw"/>
+    <remap from="/TNN_Recognize_Node/image" to="/Camera/image"/>
   </node>
 </launch>

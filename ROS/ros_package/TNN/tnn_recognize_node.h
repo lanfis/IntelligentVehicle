@@ -117,6 +117,7 @@ TNN_Recognize_Node::TNN_Recognize_Node(int thread) : it_(n_), spinner(thread)
     cout << "ok !\n";
   else
     cout << "fail !\n";
+  cout << "-- defalut weight path : " << tnn_recognize -> tnn_fileName << endl;
   
   spinner.start();
   cout << "-- recognizing ...\n";
@@ -146,7 +147,7 @@ void TNN_Recognize_Node::run()
       sub_init();
       flag_activation = true;
     }
-    
+
     if(flag_image_update)
     {
       if(tnn_recognize -> run(img))
@@ -155,7 +156,7 @@ void TNN_Recognize_Node::run()
         accuracy_publish();
       }
     }
-    activation = false;
+    //activation = false;
     flag_image_update = false;
 }
 
@@ -163,6 +164,7 @@ void TNN_Recognize_Node::image_callBack(const sensor_msgs::ImageConstPtr& msg)
 {
     if(!flag_activation) return;
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    //cv_ptr -> image.copyTo(img);
     img = cv_ptr -> image;
     flag_image_update = true;
 }

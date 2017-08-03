@@ -52,16 +52,17 @@ class TNN_Train
 
     string data_dir_path;// = working_directory + "/MNIST/";
     string train_data_list;// = working_directory + "/data_list.txt";
-    int minibatch_size = 10;
-    int num_epochs = 20;
+    int minibatch_size = 128;
+    int num_epochs = 128;
     timer t;
     bool mnist_train = true;
     bool mnist_test = true;
 
   private:
     TNN_Network *nn_;
-    momentum optimizer_;
+//    momentum optimizer_;
 //    adagrad optimizer_;
+    adam optimizer_;
 
     vector<vec_t>   train_image_;
     vector<label_t> train_label_;
@@ -87,8 +88,8 @@ class TNN_Train
     void construct_net();
     bool weight_save();
     bool weight_load();
-    void mnist_train_load();
-    void mnist_test_load();
+    bool mnist_train_load();
+    bool mnist_test_load();
     bool training_data_fetch(string listFileName, double scale, int w, int h, vector<vec_t>& data, vector<label_t>& label);//not done
     void working_directory_set(string path);
     void run();
@@ -121,6 +122,7 @@ void TNN_Train::construct_net()
   delete nn_;
   nn_ = new TNN_Network;
   nn_ -> construct_net();
+  nn_ -> show_net();
 }
 
 
@@ -240,16 +242,18 @@ bool TNN_Train::weight_load()
   return nn_ -> weight_load(tnn_fileName);
 }
 
-void TNN_Train::mnist_train_load()
+bool TNN_Train::mnist_train_load()
 {
   tiny_dnn::parse_mnist_labels(data_dir_path + "train-labels.idx1-ubyte", &train_label_);  
   tiny_dnn::parse_mnist_images(data_dir_path + "train-images.idx3-ubyte", &train_image_, -1.0, 1.0, 2, 2);  
+  return true;
 }
 
-void TNN_Train::mnist_test_load()
+bool TNN_Train::mnist_test_load()
 {
   tiny_dnn::parse_mnist_labels(data_dir_path + "t10k-labels.idx1-ubyte", &test_label_);  
   tiny_dnn::parse_mnist_images(data_dir_path + "t10k-images.idx3-ubyte", &test_image_, -1.0, 1.0, 2, 2);  
+  return true;
 }
 
 void TNN_Train::working_directory_set(string path)

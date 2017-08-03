@@ -82,12 +82,34 @@ TNN_Train_Node::TNN_Train_Node(int thread) : spinner(thread)
   tnn_train -> construct_net();
 //  cout << "-- setting working directory path ...\n";
 //  tnn_train -> working_directory_set("/home/adel/Dropbox/ROS/ros_package/TNN/TNN_WORK_SPACE");
-  cout << "-- weight loading with default working space path ...\n";
-  tnn_train -> weight_load();
-  cout << "-- mnist train data loading with default working space path ...\n";
-  tnn_train -> mnist_train_load();
-  cout << "-- mnist test data loading with default working space path ...\n";
-  tnn_train -> mnist_test_load();
+  cout << "-- data path : " << tnn_train -> data_dir_path << endl;
+  cout << "-- weight loading with default working space path ...";
+  if(tnn_train -> weight_load())
+  {
+    cout << "ok !\n";
+  }
+  else
+  {
+    cout << "fail !\n";
+  }
+  cout << "-- mnist train data loading with default working space path ...";
+  if(tnn_train -> mnist_train_load())
+  {
+    cout << "ok !\n";
+  }
+  else
+  {
+    cout << "fail !\n";
+  }
+  cout << "-- mnist test data loading with default working space path ...";
+  if(tnn_train -> mnist_test_load())
+  {
+    cout << "ok !\n";
+  }
+  else
+  {
+    cout << "fail !\n";
+  }
   
   spinner.start();
   cout << "-- training ...\n";
