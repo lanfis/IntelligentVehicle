@@ -1,8 +1,0 @@
-prefix=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/install
-
-Name: pic_sim
-Description: Description of pic_sim
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/install/lib 
-Requires: 
