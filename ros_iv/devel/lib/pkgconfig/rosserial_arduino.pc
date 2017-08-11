@@ -1,0 +1,8 @@
+prefix=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel
+
+Name: rosserial_arduino
+Description: Description of rosserial_arduino
+Version: 0.7.5
+Cflags: -I/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel/include
+Libs: -L/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel/lib 
+Requires: message_runtime

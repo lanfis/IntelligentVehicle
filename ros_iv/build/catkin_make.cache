@@ -1,2 +1,0 @@
-async_web_server_cpp:iai_kinect2/iai_kinect2:iai_kinect2/kinect2_bridge:iai_kinect2/kinect2_calibration:iai_kinect2/kinect2_registration:iai_kinect2/kinect2_viewer:pic_sim:viewer:vision_system:web_video_server
--DCATKIN_DEVEL_PREFIX=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel -DCMAKE_INSTALL_PREFIX=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/install -G Unix Makefiles
