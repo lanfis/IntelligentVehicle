@@ -1,0 +1,11 @@
+<launch>
+  <node name="vision_system" pkg="vision_system" type="vision_system" respawn="false" output="screen">
+      <remap from="/Camera_Focus/image" to="/Camera/image"/>
+      <remap from="/Motion_Detector/image" to="/Camera/image"/>
+  </node>
+  
+  <node name="viewer" pkg="viewer" type="viewer" respawn="false" output="screen">
+    <remap from="Viewer/image_sub" to="/Camera/image"/>
+    <remap from="Viewer/roi_sub" to="/Motion_Detector/motion_roi"/>
+  </node>
+</launch>

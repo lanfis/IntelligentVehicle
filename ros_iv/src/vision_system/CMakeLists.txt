@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   rostime
   sensor_msgs
   std_msgs
+  nodelet
 )
 
 
@@ -207,6 +208,23 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(camera src/camera.cpp)
-target_link_libraries(camera ${catkin_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
-add_dependencies(camera camera)
+#add_executable(camera src/camera.cpp)
+#target_link_libraries(camera ${catkin_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+#add_dependencies(camera camera)
+
+#add_library(${PROJECT_NAME} SHARED ../../../ROS/ros_package/VISION_SYSTEM/camera_focus.cpp)
+#target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_library(camera_focus SHARED ../../../ROS/ros_package/VISION_SYSTEM/camera_focus.cpp)
+target_link_libraries(camera_focus ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_library(motion_detector SHARED ../../../ROS/ros_package/VISION_SYSTEM/motion_detector.cpp)
+target_link_libraries(motion_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(vision_system src/vision_system.cpp)# ../../../ROS/ros_package/VISION_SYSTEM/camera_focus.cpp)
+target_link_libraries(vision_system ${catkin_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+add_dependencies(vision_system vision_system)
+
+
+#add_executable(camera_focus src/vision_system.cpp)
+#target_link_libraries(camera_focus ${catkin_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+#add_dependencies(camera_focus camera_focus)

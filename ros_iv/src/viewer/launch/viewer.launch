@@ -1,0 +1,11 @@
+<launch>
+  <node name="vision_system" pkg="vision_system" type="vision_system" respawn="false" output="screen">
+    <param name="Vision_System/device_id" value="0" />
+  </node>
+  
+
+  <node name="viewer" pkg="viewer" type="viewer" respawn="false" output="screen">
+    <remap from="Viewer/image_sub" to="Vision_System/image_roi"/>
+	
+  </node>
+</launch>

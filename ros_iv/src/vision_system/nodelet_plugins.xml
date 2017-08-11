@@ -1,0 +1,15 @@
+<library path="lib/libcamera_focus">
+  <class name="camera_focus_nodelet/camera_focus" type="camera_focus_nodelet::camera_focus" base_class_type="nodelet::Nodelet">
+  <description>
+  This is my nodelet.
+  </description>
+  </class>
+</library>
+
+<library path="lib/libmotion_detector">
+  <class name="motion_detector_nodelet/motion_detector" type="motion_detector_nodelet::motion_detector" base_class_type="nodelet::Nodelet">
+  <description>
+  This is my nodelet.
+  </description>
+  </class>
+</library>

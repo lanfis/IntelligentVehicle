@@ -1,0 +1,8 @@
+prefix=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel
+
+Name: kinect2_calibration
+Description: Description of kinect2_calibration
+Version: 0.0.1
+Cflags: 
+Libs: -L/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel
+
+Name: kinect2_bridge
+Description: Description of kinect2_bridge
+Version: 0.0.1
+Cflags: -I/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/src/iai_kinect2/kinect2_bridge/include
+Libs: -L/home/adel/Dropbox/Github/IntelligentVehicle/ros_iv/devel/lib 
+Requires: kinect2_registration
