@@ -7,7 +7,7 @@ If submodules directories still empty, type :
 
 "git submodule update"
 
-Inside program si divided into 3 types : "package", "node" and "nodelet".
+Inside program is divided into 3 types : "package", "node" and "nodelet".
 
 "package" is put in the "ros_iv/src", and every directories is "node". Only algorithm or passive program is used nodelet which is writen as plugins in the directories where the "node" is.
 
