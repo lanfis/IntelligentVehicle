@@ -24,8 +24,8 @@ class MOTION
     public:
       int delay_count;
       int thresh;
-      int min_box_length;
-      int max_box_length;
+      float min_box_length_ratio;
+      float max_box_length_ratio;
       int bg_filter_ksize;
       float bg_filter_sigma;
       int num_detect;
@@ -35,6 +35,8 @@ class MOTION
     
     private:
       vector<Rect> box_past_;
+      int min_box_length;
+      int max_box_length;
       int num_detect_;  
       int num_detect_past_;  
       int delay_count_; 
@@ -50,8 +52,8 @@ MOTION::MOTION()
 {
     delay_count = 1;
     thresh = 20;
-    min_box_length = 15;
-    max_box_length = 25;
+    min_box_length_ratio = 15.0/640.0;
+    max_box_length_ratio = 200.0/640.0;
     bg_filter_ksize = 3;
     bg_filter_sigma = 1;
     num_detect = 3;
@@ -71,6 +73,8 @@ void MOTION::init(Mat& img)
     img.copyTo(img_past);
     img.copyTo(img_current);
   }
+  min_box_length = int(min_box_length_ratio*float(img.cols));
+  max_box_length = int(max_box_length_ratio*float(img.cols));
 }
 
 void MOTION::run(Mat& img, vector<Rect>& box)
