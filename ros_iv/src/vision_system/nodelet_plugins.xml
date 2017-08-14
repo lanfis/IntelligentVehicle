@@ -13,3 +13,11 @@
   </description>
   </class>
 </library>
+
+<library path="lib/libimage_tracker">
+  <class name="image_tracker_nodelet/image_tracker" type="image_tracker_nodelet::image_tracker" base_class_type="nodelet::Nodelet">
+  <description>
+  This is my nodelet.
+  </description>
+  </class>
+</library>

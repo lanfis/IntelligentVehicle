@@ -16,6 +16,7 @@
 #include <std_msgs/UInt16MultiArray.h>
 
 #include "MOTION_DETECTOR/Motion_Detector.h"
+#include "MOTION_DETECTOR/Motion_Detector_KNN.h"
 
 using namespace std;
 using namespace ros;
@@ -28,7 +29,7 @@ class motion_detector : public nodelet::Nodelet
   private:
     string ver_ = "1.1";
     ros::NodeHandle n_;
-    Motion_Detector *md;
+    Motion_Detector_KNN *md;
 
   public:
     motion_detector();//ros::NodeHandle& nh);
@@ -39,7 +40,7 @@ class motion_detector : public nodelet::Nodelet
     virtual void onInit()
     {
       n_ = getNodeHandle();
-      md = new Motion_Detector(n_);
+      md = new Motion_Detector_KNN(n_);
       md -> init();
     }
     

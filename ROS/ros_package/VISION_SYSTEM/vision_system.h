@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _VISION_SYSTEM_H_
-#define _VISION_SYSTEM_H_
+#ifndef _ROS_VISION_SYSTEM_H_
+#define _ROS_VISION_SYSTEM_H_
 
 #include <ros/ros.h>
 #include <ros/spinner.h>

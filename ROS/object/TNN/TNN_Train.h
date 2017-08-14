@@ -52,6 +52,7 @@ class TNN_Train
 
     string data_dir_path;// = working_directory + "/MNIST/";
     string train_data_list;// = working_directory + "/data_list.txt";
+	string network_cfg_file;
     int minibatch_size = 128;
     int num_epochs = 128;
     timer t;
@@ -68,16 +69,7 @@ class TNN_Train
     vector<label_t> train_label_;
     vector<vec_t>   test_image_;
     vector<label_t> test_label_;
-/*
-    int max_training_cycle = 1;
-    float training_threshold = 0.95;
-*/
-/*
-    cv_bridge::CvImagePtr cv_ptr;
-    Mat img;
-    Mat img_gray;
-    int scale_;
-*/  
+    
     
     void progressShow(int& progress, int& total, int success, int total_num, int& freq);
     bool convert_image(Mat& imag, double scale, int w, int h, vector<vec_t>& data);
@@ -85,12 +77,12 @@ class TNN_Train
   public:
     TNN_Train();
     ~TNN_Train();
-    void construct_net();
+    bool construct_net();
     bool weight_save();
     bool weight_load();
     bool mnist_train_load();
     bool mnist_test_load();
-    bool training_data_fetch(string listFileName, double scale, int w, int h, vector<vec_t>& data, vector<label_t>& label);//not done
+    bool training_data_fetch(string& listFileName, double& scale, int& w, int& h, vector<vec_t>& data, vector<label_t>& label);
     void working_directory_set(string path);
     void run();
 };
@@ -117,12 +109,20 @@ TNN_Train::~TNN_Train()
   delete nn_;
 }
 
-void TNN_Train::construct_net()
+bool TNN_Train::construct_net()
 {   
-  delete nn_;
+  if(nn_ != NULL)
+    delete nn_;
   nn_ = new TNN_Network;
-  nn_ -> construct_net();
-  nn_ -> show_net();
+  if(nn_ -> construct_net(network_cfg_file))
+  {
+    nn_ -> show_net();
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 
@@ -156,9 +156,9 @@ void TNN_Train::run()
   progressShow(prog , total, success, success_total, count);
 }
 
-bool TNN_Train::training_data_fetch(string listFileName, double scale, int w, int h, vector<vec_t>& data, vector<label_t>& label)
+bool TNN_Train::training_data_fetch(string& listFileName, double& scale, int& w, int& h, vector<vec_t>& data, vector<label_t>& label)
 {
-  ifstream listFile(listFileName);
+  ifstream listFile(listFileName.c_str());
   if(listFile.fail())
   {
     return false;
@@ -267,6 +267,25 @@ void TNN_Train::working_directory_set(string path)
   tnn_fileName = working_directory + "/mem";
   data_dir_path = working_directory + "/MNIST/";
   train_data_list = working_directory + "/data_list.txt";
+  network_cfg_file = working_directory + "/network_model.cfg";
+  
+  ifstream inFile;
+  ofstream outFile;
+  inFile.open(train_data_list.c_str());
+  if(inFile.fail())
+  {
+	outFile.open(train_data_list);
+	outFile.close();
+  }
+  inFile.close();
+  
+  inFile.open(network_cfg_file.c_str());
+  if(inFile.fail())
+  {
+	outFile.open(network_cfg_file);
+	outFile.close();
+  }
+  inFile.close();
 }
 
 #endif

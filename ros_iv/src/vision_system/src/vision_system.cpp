@@ -31,6 +31,12 @@ int main(int argc, char** argv)
   nodelet_loader.load(nodelet_motion_detector_name, "motion_detector_nodelet/motion_detector", remap_motion_detector, nargv_motion_detector);
   ROS_INFO("%s activating ok !", nodelet_motion_detector_name.c_str());
   
+  nodelet::M_string remap_image_tracker(ros::names::getRemappings());
+  nodelet::V_string nargv_image_tracker;
+  std::string nodelet_image_tracker_name = "image_tracker";//ros::this_node::getName();// + "/motion_detector_nodelet/motion_detector";
+  nodelet_loader.load(nodelet_image_tracker_name, "image_tracker_nodelet/image_tracker", remap_image_tracker, nargv_image_tracker);
+  ROS_INFO("%s activating ok !", nodelet_image_tracker_name.c_str());
+  
   while (ros::ok()) 
   {
     vs.run();
