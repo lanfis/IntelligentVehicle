@@ -1,12 +1,17 @@
 #pragma once
-#ifndef _MOTION_DETECTOR_H_
-#define _MOTION_DETECTOR_H_
+#ifndef _MOTION_DETECTOR_KNN_H_
+#define _MOTION_DETECTOR_KNN_H_
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/videoio.hpp"
+#include <opencv2/highgui.hpp>
+#include <opencv2/video.hpp>
 //#include <sstream> // for converting the command line parameter to integer
 #include <string>
 #include <cstring>
@@ -21,13 +26,13 @@
 #include <std_msgs/UInt16MultiArray.h>
 */
 
-#include "../../object/MOTION/Motion.h"
+#include "../../object/MOTION/Motion_KNN.h"
 
 using namespace std;
 using namespace ros;
 using namespace cv;
 
-class Motion_Detector// : public nodelet::Nodelet
+class Motion_Detector_KNN// : public nodelet::Nodelet
 {    
   public:
     string nodeName = "Motion_Detector";
@@ -36,10 +41,10 @@ class Motion_Detector// : public nodelet::Nodelet
     string topic_min_box_length_sub = "Motion_Detector/min_box_length";
     string topic_man_box_length_sub = "Motion_Detector/man_box_length";
     string topic_auto_adjust_sub = "Motion_Detector/auto_adjust";
-    string topic_bg_filter_ksize_sub = "Motion_Detector/bg_filter_ksize";
-    string topic_bg_filter_sigma_sub = "Motion_Detector/bg_filter_sigma";
-    string topic_num_detect_sub = "Motion_Detector/num_detect";
-    string topic_num_detect_diff_sub = "Motion_Detector/num_detect_diff";
+    string topic_history_sub = "Motion_Detector/history";
+    string topic_dist2Threshold_sub = "Motion_Detector/dist2Threshold";
+    string topic_detectShadows_sub = "Motion_Detector/detectShadows";
+    string topic_learning_rate_sub = "Motion_Detector/learning_rate";
     string topic_motion_roi_pub = "Motion_Detector/motion_roi";
     
   private:
@@ -62,10 +67,10 @@ class Motion_Detector// : public nodelet::Nodelet
     ros::Subscriber min_box_length_sub_;
     ros::Subscriber max_box_length_sub_;
     ros::Subscriber auto_adjust_sub_;
-    ros::Subscriber bg_filter_ksize_sub_;
-    ros::Subscriber bg_filter_sigma_sub_;
-    ros::Subscriber num_detect_sub_;
-    ros::Subscriber num_detect_diff_sub_;
+    ros::Subscriber history_sub_;
+    ros::Subscriber dist2Threshold_sub_;
+    ros::Subscriber detectShadows_sub_;
+    ros::Subscriber learning_rate_sub_;
     ros::Publisher motion_roi_pub_;
     
   private:
@@ -127,37 +132,24 @@ class Motion_Detector// : public nodelet::Nodelet
     void min_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg);
     void max_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg);
     void auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg);
-    void bg_filter_ksize_callBack(const std_msgs::Int32::ConstPtr& msg);
-    void bg_filter_sigma_callBack(const std_msgs::Float32::ConstPtr& msg);
-    void num_detect_callBack(const std_msgs::Int32::ConstPtr& msg);
-    void num_detect_diff_callBack(const std_msgs::Int32::ConstPtr& msg);
+    void history_callBack(const std_msgs::Int32::ConstPtr& msg);
+    void dist2Threshold_callBack(const std_msgs::Float32::ConstPtr& msg);
+    void detectShadows_callBack(const std_msgs::Bool::ConstPtr& msg);
+    void learning_rate_callBack(const std_msgs::Float32::ConstPtr& msg);
     void roi_publish();
     
   private:
-    MOTION *motion;
+    MOTION_KNN *motion_knn;
     Mat image;
     Mat image_motion;
     vector<Rect> motion_box;
-    int motion_sensity_level = 5;
     bool flag_motion_image = false;
     bool flag_motion_roi = false;
     bool flag_motion_init = false;
-    /*
-    double min_box_length;
-    double max_box_length;
-    bool auto_adjust;
-    //NOT IN USE
-    int bg_filter_ksize;
-    double bg_filter_sigma;
-    int num_detect;
-    int num_detect_tor;
-    int num_detect_diff;
-    //NOT IN USE
-    */
 
   public:
-    Motion_Detector(ros::NodeHandle& nh);
-    ~Motion_Detector();
+    Motion_Detector_KNN(ros::NodeHandle& nh);
+    ~Motion_Detector_KNN();
     void run();
     
   public:
@@ -168,10 +160,10 @@ class Motion_Detector// : public nodelet::Nodelet
       it_motion_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(n_));
       msg_image = boost::shared_ptr<sensor_msgs::Image>(new sensor_msgs::Image);
       msg_image_motion = boost::shared_ptr<sensor_msgs::Image>(new sensor_msgs::Image);
-      connect_cb_image_motion    = boost::bind(&Motion_Detector::connectCb_image_motion, this, _1);
-      disconnect_cb_image_motion = boost::bind(&Motion_Detector::disconnectCb_image_motion, this, _1);
-      connect_cb_motion_roi    = boost::bind(&Motion_Detector::connectCb_motion_roi, this, _1);
-      disconnect_cb_motion_roi = boost::bind(&Motion_Detector::disconnectCb_motion_roi, this, _1);
+      connect_cb_image_motion    = boost::bind(&Motion_Detector_KNN::connectCb_image_motion, this, _1);
+      disconnect_cb_image_motion = boost::bind(&Motion_Detector_KNN::disconnectCb_image_motion, this, _1);
+      connect_cb_motion_roi    = boost::bind(&Motion_Detector_KNN::connectCb_motion_roi, this, _1);
+      disconnect_cb_motion_roi = boost::bind(&Motion_Detector_KNN::disconnectCb_motion_roi, this, _1);
       pub_init();
       pub_topic_get();
       //sub_init();
@@ -180,28 +172,28 @@ class Motion_Detector// : public nodelet::Nodelet
     
 };
 
-Motion_Detector::Motion_Detector(ros::NodeHandle& nh) : n_(nh)
+Motion_Detector_KNN::Motion_Detector_KNN(ros::NodeHandle& nh) : n_(nh)
 {    
-    motion = new MOTION;
+    motion_knn = new MOTION_KNN;
 }
 
-Motion_Detector::~Motion_Detector()
+Motion_Detector_KNN::~Motion_Detector_KNN()
 {
-    delete motion;
+    delete motion_knn;
 }
 
-void Motion_Detector::run()
+void Motion_Detector_KNN::run()
 {  
     if(!flag_motion_init)
     {
-        motion -> init(this -> image);
+        motion_knn -> init();
         flag_motion_init = true;
     }
-    motion -> run(this -> image, motion_box);
+    motion_knn -> run(this -> image, this -> image_motion, motion_box);
     //image.copyTo(image_motion);
     for(int i = 0; i < motion_box.size(); i++)
     {
-       rectangle( image, motion_box[i], cv::Scalar(0, motion -> thresh*motion_sensity_level, 0), 1, 8, 0 );
+       rectangle( image, motion_box[i], cv::Scalar(0, 255, 0), 2, 8, 0 );
     }
     roi_publish();
     motion_box.clear();
@@ -209,22 +201,22 @@ void Motion_Detector::run()
 }
 
 
-void Motion_Detector::image_motion_publish()
+void Motion_Detector_KNN::image_motion_publish()
 {
   if(!flag_motion_image) return;
   //sensor_msgs::ImagePtr msg_image(new sensor_msgs::Image);
-  msg_image = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
+  msg_image = cv_bridge::CvImage(std_msgs::Header(), "mono8", image_motion).toImageMsg();
   //sensor_msgs::ImagePtr msg_image;
   //msg_image = cv_bridge::CvImage(std_msgs::Header(), "bgr8", *image).toImageMsg();
   it_motion_pub_.publish(msg_image);
 }
 
-void Motion_Detector::image_callBack(const sensor_msgs::ImageConstPtr& msg)
+void Motion_Detector_KNN::image_callBack(const sensor_msgs::ImageConstPtr& msg)
 {
     try
     {
       cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
-      //cv_ptr -> image.copyTo(*image);
+      //cv_ptr -> image.copyTo(image);
       this -> image = cv_ptr -> image;
       run();
       return;
@@ -234,24 +226,21 @@ void Motion_Detector::image_callBack(const sensor_msgs::ImageConstPtr& msg)
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-    //sensor_msgs::Image::Ptr cv_ptr = cv_bridge::CvImage(msg->header, msg->encoding, out_image).toImageMsg();
-    //cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    //this -> image = cv_ptr -> image;
 }
 
-void Motion_Detector::min_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
+void Motion_Detector_KNN::min_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
 {
     ROS_INFO("Motion min_box_length is changed to %f !", msg -> data);
-    motion -> min_box_length_ratio = msg -> data;
+    motion_knn -> min_box_length_ratio = msg -> data;
 }
 
-void Motion_Detector::max_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
+void Motion_Detector_KNN::max_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
 {
     ROS_INFO("Motion max_box_length is changed to %f !", msg -> data);
-    motion -> max_box_length_ratio = msg -> data;
+    motion_knn -> max_box_length_ratio = msg -> data;
 }
 
-void Motion_Detector::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
+void Motion_Detector_KNN::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
 {
     if(msg -> data)
     {
@@ -264,34 +253,40 @@ void Motion_Detector::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
       ROS_INFO("Motion auto_adjust off !");
       sub_manual_shutdown();
     }
-    motion -> auto_adjust = msg -> data;
+    motion_knn -> auto_adjust = msg -> data;
 }
 
-void Motion_Detector::bg_filter_ksize_callBack(const std_msgs::Int32::ConstPtr& msg)
+void Motion_Detector_KNN::history_callBack(const std_msgs::Int32::ConstPtr& msg)
 {
-    ROS_INFO("Motion bg_filter_ksize is changed to %d !", msg -> data);
-    motion -> bg_filter_ksize = msg -> data;
+    ROS_INFO("Motion history is changed to %d !", msg -> data);
+    motion_knn -> history = msg -> data;
+    flag_motion_init = false;
 }
 
-void Motion_Detector::bg_filter_sigma_callBack(const std_msgs::Float32::ConstPtr& msg)
+void Motion_Detector_KNN::dist2Threshold_callBack(const std_msgs::Float32::ConstPtr& msg)
 {
-    ROS_INFO("Motion bg_filter_sigma is changed to %f !", msg -> data);
-    motion -> bg_filter_sigma = msg -> data;
+    ROS_INFO("Motion dist2Threshold is changed to %f !", msg -> data);
+    motion_knn -> dist2Threshold = msg -> data;
+    flag_motion_init = false;
 }
 
-void Motion_Detector::num_detect_callBack(const std_msgs::Int32::ConstPtr& msg)
+void Motion_Detector_KNN::detectShadows_callBack(const std_msgs::Bool::ConstPtr& msg)
 {
-    ROS_INFO("Motion num_detect is changed to %d !", msg -> data);
-    motion -> num_detect = msg -> data;
+    if(msg -> data)
+      ROS_INFO("Motion detectShadows on !");
+	else
+      ROS_INFO("Motion detectShadows off !");
+    motion_knn -> detectShadows = msg -> data;
+	flag_motion_init = false;
 }
 
-void Motion_Detector::num_detect_diff_callBack(const std_msgs::Int32::ConstPtr& msg)
+void Motion_Detector_KNN::learning_rate_callBack(const std_msgs::Float32::ConstPtr& msg)
 {
-    ROS_INFO("Motion num_detect_diff is changed to %d !", msg -> data);
-    motion -> num_detect_diff = msg -> data;
+    ROS_INFO("Motion learning_rate is changed to %f!", msg -> data);
+    motion_knn -> learning_rate = msg -> data;
 }
 
-void Motion_Detector::roi_publish()
+void Motion_Detector_KNN::roi_publish()
 {
     if(!flag_motion_roi) return;
     sensor_msgs::RegionOfInterest msg;
@@ -305,13 +300,13 @@ void Motion_Detector::roi_publish()
     }
 }
     
-void Motion_Detector::pub_topic_get()
+void Motion_Detector_KNN::pub_topic_get()
 {
     topic_image_motion_pub = it_motion_pub_.getTopic();
     topic_motion_roi_pub = motion_roi_pub_.getTopic();
 }
 
-void Motion_Detector::pub_init()
+void Motion_Detector_KNN::pub_init()
 {
     ROS_INFO("Publisher %s initiating !", topic_image_sub.c_str());
     it_motion_pub_ = it_motion_ -> advertise(topic_image_motion_pub, queue_size, connect_cb_image_motion, disconnect_cb_image_motion);
@@ -319,7 +314,7 @@ void Motion_Detector::pub_init()
     motion_roi_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_motion_roi_pub.c_str(), queue_size, connect_cb_motion_roi, disconnect_cb_motion_roi);
 }
 
-void Motion_Detector::pub_shutdown()
+void Motion_Detector_KNN::pub_shutdown()
 {
     ROS_WARN("Publisher %s shuting down !", topic_image_motion_pub.c_str());
     it_motion_pub_.shutdown();
@@ -327,7 +322,7 @@ void Motion_Detector::pub_shutdown()
     motion_roi_pub_.shutdown();
 }
 
-void Motion_Detector::sub_topic_get()
+void Motion_Detector_KNN::sub_topic_get()
 {   
     topic_image_sub = it_sub_.getTopic();
     topic_min_box_length_sub = min_box_length_sub_.getTopic();
@@ -336,20 +331,20 @@ void Motion_Detector::sub_topic_get()
     sub_manual_topic_get();
 }
 
-void Motion_Detector::sub_init()
+void Motion_Detector_KNN::sub_init()
 {
     ROS_INFO("Subscriber %s initiating !", topic_image_sub.c_str());
-    it_sub_ = it_ -> subscribe(topic_image_sub.c_str(), queue_size, &Motion_Detector::image_callBack, this);
+    it_sub_ = it_ -> subscribe(topic_image_sub.c_str(), queue_size, &Motion_Detector_KNN::image_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_min_box_length_sub.c_str());
-    min_box_length_sub_ = n_.subscribe(topic_min_box_length_sub.c_str(), queue_size, &Motion_Detector::min_box_length_ratio_callBack, this);
+    min_box_length_sub_ = n_.subscribe(topic_min_box_length_sub.c_str(), queue_size, &Motion_Detector_KNN::min_box_length_ratio_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_man_box_length_sub.c_str());
-    max_box_length_sub_ = n_.subscribe(topic_man_box_length_sub.c_str(), queue_size, &Motion_Detector::max_box_length_ratio_callBack, this);
+    max_box_length_sub_ = n_.subscribe(topic_man_box_length_sub.c_str(), queue_size, &Motion_Detector_KNN::max_box_length_ratio_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_auto_adjust_sub.c_str());
-    auto_adjust_sub_ = n_.subscribe(topic_auto_adjust_sub.c_str(), queue_size, &Motion_Detector::auto_adjust_callBack, this);
+    auto_adjust_sub_ = n_.subscribe(topic_auto_adjust_sub.c_str(), queue_size, &Motion_Detector_KNN::auto_adjust_callBack, this);
     sub_manual_init();
 }
 
-void Motion_Detector::sub_shutdown()
+void Motion_Detector_KNN::sub_shutdown()
 {
     ROS_WARN("Subscriber %s shuting down !", topic_image_sub.c_str());
     it_sub_.shutdown();
@@ -362,39 +357,39 @@ void Motion_Detector::sub_shutdown()
     sub_manual_shutdown();
 }
 
-void Motion_Detector::sub_manual_topic_get()
+void Motion_Detector_KNN::sub_manual_topic_get()
 {   
-    if(motion -> auto_adjust) return;
-    topic_bg_filter_ksize_sub = bg_filter_ksize_sub_.getTopic();
-    topic_bg_filter_sigma_sub = bg_filter_sigma_sub_.getTopic();
-    topic_num_detect_sub = num_detect_sub_.getTopic();
-    topic_num_detect_diff_sub = num_detect_diff_sub_.getTopic();
+    if(motion_knn -> auto_adjust) return;
+    topic_history_sub = history_sub_.getTopic();
+    topic_dist2Threshold_sub = dist2Threshold_sub_.getTopic();
+    topic_detectShadows_sub = detectShadows_sub_.getTopic();
+    topic_learning_rate_sub = learning_rate_sub_.getTopic();
 }
 
-void Motion_Detector::sub_manual_init()
+void Motion_Detector_KNN::sub_manual_init()
 {
-    if(motion -> auto_adjust) return;
-    ROS_INFO("Subscriber %s initiating !", topic_bg_filter_ksize_sub.c_str());
-    bg_filter_ksize_sub_ = n_.subscribe(topic_bg_filter_ksize_sub.c_str(), queue_size, &Motion_Detector::bg_filter_ksize_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_bg_filter_sigma_sub.c_str());
-    bg_filter_sigma_sub_ = n_.subscribe(topic_bg_filter_sigma_sub.c_str(), queue_size, &Motion_Detector::bg_filter_sigma_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_num_detect_sub.c_str());
-    num_detect_sub_ = n_.subscribe(topic_num_detect_sub.c_str(), queue_size, &Motion_Detector::num_detect_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_num_detect_diff_sub.c_str());
-    num_detect_diff_sub_ = n_.subscribe(topic_num_detect_diff_sub.c_str(), queue_size, &Motion_Detector::num_detect_diff_callBack, this);
+    if(motion_knn -> auto_adjust) return;
+    ROS_INFO("Subscriber %s initiating !", topic_history_sub.c_str());
+    history_sub_ = n_.subscribe(topic_history_sub.c_str(), queue_size, &Motion_Detector_KNN::history_callBack, this);
+    ROS_INFO("Subscriber %s initiating !", topic_dist2Threshold_sub.c_str());
+    dist2Threshold_sub_ = n_.subscribe(topic_dist2Threshold_sub.c_str(), queue_size, &Motion_Detector_KNN::dist2Threshold_callBack, this);
+    ROS_INFO("Subscriber %s initiating !", topic_detectShadows_sub.c_str());
+    detectShadows_sub_ = n_.subscribe(topic_detectShadows_sub.c_str(), queue_size, &Motion_Detector_KNN::detectShadows_callBack, this);
+    ROS_INFO("Subscriber %s initiating !", topic_learning_rate_sub.c_str());
+    learning_rate_sub_ = n_.subscribe(topic_learning_rate_sub.c_str(), queue_size, &Motion_Detector_KNN::learning_rate_callBack, this);
 }
 
-void Motion_Detector::sub_manual_shutdown()
+void Motion_Detector_KNN::sub_manual_shutdown()
 {
-    if(motion -> auto_adjust) return;
-    ROS_WARN("Subscriber %s shuting down !", topic_bg_filter_ksize_sub.c_str());
-    bg_filter_ksize_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_bg_filter_sigma_sub.c_str());
-    bg_filter_sigma_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_num_detect_sub.c_str());
-    num_detect_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_num_detect_diff_sub.c_str());
-    num_detect_diff_sub_.shutdown();
+    if(motion_knn -> auto_adjust) return;
+    ROS_WARN("Subscriber %s shuting down !", topic_history_sub.c_str());
+    history_sub_.shutdown();
+    ROS_WARN("Subscriber %s shuting down !", topic_dist2Threshold_sub.c_str());
+    dist2Threshold_sub_.shutdown();
+    ROS_WARN("Subscriber %s shuting down !", topic_detectShadows_sub.c_str());
+    detectShadows_sub_.shutdown();
+    ROS_WARN("Subscriber %s shuting down !", topic_learning_rate_sub.c_str());
+    learning_rate_sub_.shutdown();
 }
 #endif
 

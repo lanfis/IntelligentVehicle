@@ -53,7 +53,7 @@ MOTION::MOTION()
     delay_count = 1;
     thresh = 20;
     min_box_length_ratio = 15.0/640.0;
-    max_box_length_ratio = 200.0/640.0;
+    max_box_length_ratio = 400.0/640.0;
     bg_filter_ksize = 3;
     bg_filter_sigma = 1;
     num_detect = 3;
