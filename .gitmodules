@@ -1,5 +1,5 @@
-[submodule "ROS/ros_object/TNN/tiny-dnn"]
-	path = ROS/ros_object/TNN/tiny-dnn
+[submodule "ROS/object/TNN/tiny-dnn"]
+	path = ROS/object/TNN/tiny-dnn
 	url = https://github.com/tiny-dnn/tiny-dnn.git
 [submodule "ros_iv/src/web_video_server"]
 	path = ros_iv/src/web_video_server
@@ -7,3 +7,6 @@
 [submodule "ros_iv/src/rosserial"]
 	path = ros_iv/src/rosserial
 	url = https://github.com/ros-drivers/rosserial.git
+[submodule "ROS/object/DARKNET/darknet"]
+	path = ROS/object/DARKNET/darknet
+	url = https://github.com/pjreddie/darknet.git
