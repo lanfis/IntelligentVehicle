@@ -1,3 +1,3 @@
 # Motion Detection
-TODO : Enviroment self-adjusting
+TODO : Advance parameter adjusting
 

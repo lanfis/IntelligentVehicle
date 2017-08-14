@@ -169,9 +169,6 @@ class Face_Detector
   private:
     Face_Detector_Cascade *fdc;
     Mat image;
-    vector<Rect> face;
-    vector<Rect> fullbody;
-    vector<Rect> upperbody;
     bool flag_motion_image = false;
     bool flag_motion_roi = false;
     bool flag_motion_init = false;
@@ -217,22 +214,14 @@ Face_Detector::~Face_Detector()
 
 void Face_Detector::run()
 {  
-    if(!flag_motion_init)
-    {
-        fdc -> init(this -> image);
-        flag_motion_init = true;
-    }
-    fdc -> run(this -> image, motion_box);
-    //image.copyTo(image_motion);
+    fdc -> fullbody_detect(this -> image);
+    fdc -> upperbody_detect(this -> image);
+    fdc -> face_detect(this -> image);
     for(int i = 0; i < motion_box.size(); i++)
     {
-       rectangle( image, motion_box[i], cv::Scalar(0, fdc -> thresh*motion_sensity_level, 0), 1, 8, 0 );
+       rectangle( image, fdc -> fullbody[i], cv::Scalar(0, 255, 0), 1, 8, 0 );
     }
-    roi_publish();
-    motion_box.clear();
-    image_detect_publish();
 }
-
 
 void Face_Detector::image_detect_publish()
 {
@@ -259,23 +248,8 @@ void Face_Detector::image_callBack(const sensor_msgs::ImageConstPtr& msg)
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-    //sensor_msgs::Image::Ptr cv_ptr = cv_bridge::CvImage(msg->header, msg->encoding, out_image).toImageMsg();
-    //cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-    //this -> image = cv_ptr -> image;
 }
-
-void Face_Detector::min_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
-{
-    ROS_INFO("Motion min_box_length is changed to %f !", msg -> data);
-    fdc -> min_box_length_ratio = msg -> data;
-}
-
-void Face_Detector::max_box_length_ratio_callBack(const std_msgs::Float32::ConstPtr& msg)
-{
-    ROS_INFO("Motion max_box_length is changed to %f !", msg -> data);
-    fdc -> max_box_length_ratio = msg -> data;
-}
-
+/*
 void Face_Detector::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
 {
     if(msg -> data)
@@ -291,41 +265,22 @@ void Face_Detector::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
     }
     fdc -> auto_adjust = msg -> data;
 }
+*/
+    void image_detect_publish();
+    void image_face_publish();
+    void image_fullbody_publish();
+    void image_upperbody_publish();
 
-void Face_Detector::bg_filter_ksize_callBack(const std_msgs::Int32::ConstPtr& msg)
-{
-    ROS_INFO("Motion bg_filter_ksize is changed to %d !", msg -> data);
-    fdc -> bg_filter_ksize = msg -> data;
-}
-
-void Face_Detector::bg_filter_sigma_callBack(const std_msgs::Float32::ConstPtr& msg)
-{
-    ROS_INFO("Motion bg_filter_sigma is changed to %f !", msg -> data);
-    fdc -> bg_filter_sigma = msg -> data;
-}
-
-void Face_Detector::num_detect_callBack(const std_msgs::Int32::ConstPtr& msg)
-{
-    ROS_INFO("Motion num_detect is changed to %d !", msg -> data);
-    fdc -> num_detect = msg -> data;
-}
-
-void Face_Detector::num_detect_diff_callBack(const std_msgs::Int32::ConstPtr& msg)
-{
-    ROS_INFO("Motion num_detect_diff is changed to %d !", msg -> data);
-    fdc -> num_detect_diff = msg -> data;
-}
-
-void Face_Detector::roi_publish()
+void Face_Detector::image_fullbody_publish()
 {
     if(!flag_motion_roi) return;
     sensor_msgs::RegionOfInterest msg;
     for(int i = 0; i < motion_box.size(); i++)
     {
-      msg.x_offset = motion_box[i].x + motion_box[i].width/2;      
-      msg.y_offset = motion_box[i].y + motion_box[i].height/2;      
-      msg.width    = motion_box[i].width;      
-      msg.height   = motion_box[i].height;     
+      msg.x_offset = fdc -> fullbody[i].x + fdc -> fullbody[i].width/2;      
+      msg.y_offset = fdc -> fullbody[i].y + fdc -> fullbody[i].height/2;      
+      msg.width    = fdc -> fullbody[i].width;      
+      msg.height   = fdc -> fullbody[i].height;     
       image_face_pub_.publish(msg);
     }
 }
