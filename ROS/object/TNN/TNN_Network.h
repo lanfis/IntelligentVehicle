@@ -108,6 +108,7 @@ bool TNN_Network::construct_net(string& tnn_fileName)
     token.clear();
     token << str;
     token >> layer_name;
+	cout << "#Constructing Layer " << i+1 << " : " << layer_name << endl;
     if(layer_name == "convolutional_layer")
     {
         int in_width = layer_width_in;//input image width
@@ -116,6 +117,12 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         int window_height = 5;//window_height(kernel) size of convolution 
         int in_channels = layer_channel_in;//input image channels (grayscale=1, rgb=3) 
         int out_channels = 3;//soutput image channels 
+		string pad = "valid";//rounding strategy
+		/*– valid: use valid pixels of input only. output-size = (in-width - window_width + 1) * (in-height - window_height + 1) * out_channels
+  		  – same: add zero-padding to keep same width/height. output-size = in-width * in-height * out_channels */
+		bool has_bias = true;//whether to add a bias vector to the ﬁlter outputs 
+		int  w_stride = 1;//specify the horizontal interval at which to apply the ﬁlters to the input 
+		int  h_stride = 1;//specify the horizontal interval at which to apply the ﬁlters to the input 
         while(token >> str)
         {
             if(str == "in_width") token >> in_width;
@@ -124,10 +131,30 @@ bool TNN_Network::construct_net(string& tnn_fileName)
             if(str == "window_height") token >> window_height;
             if(str == "in_channels") token >> in_channels;
             if(str == "out_channels") token >> out_channels;
+            if(str == "padding") token >> pad;
+            if(str == "has_bias")
+			{
+				token >> str;
+                if(str == "false")
+                    has_bias = false;
+                else
+                    has_bias = true;
+			}
+            if(str == "w_stride") token >> w_stride;
+            if(str == "h_stride") token >> h_stride;
         }
-        nn << convolutional_layer(in_width, in_height, window_width, window_height, in_channels, out_channels);
-        layer_width_in = in_width - window_width + 1;
-        layer_height_in = in_height - window_height + 1;
+		if(pad == "same")
+		{
+          nn << convolutional_layer(in_width, in_height, window_width, window_height, in_channels, out_channels, padding::same, has_bias, w_stride, h_stride, core::default_engine());
+          layer_width_in = in_width;
+          layer_height_in = in_height;
+		}
+	    else
+		{
+          nn << convolutional_layer(in_width, in_height, window_width, window_height, in_channels, out_channels, padding::valid, has_bias, w_stride, h_stride, core::default_engine());
+          layer_width_in = in_width - window_width + 1;
+          layer_height_in = in_height - window_height + 1;
+		}
         layer_channel_in = out_channels;
     }
     if(layer_name == "average_pooling_layer")
@@ -137,6 +164,9 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         int in_channels = layer_channel_in;//sthe number of input image channels(depth)
         int pool_size_x = 2;//factor by which to downscale
         int pool_size_y = 2;//factor by which to downscale
+		int stride_x = 1;//interval at which to apply the ﬁlters to the input 
+		int stride_y = 1;//interval at which to apply the ﬁlters to the input 
+		string pad = "valid";//padding mode(same/valid)
         while(token >> str)
         {
             if(str == "in_width") token >> in_width;
@@ -144,6 +174,9 @@ bool TNN_Network::construct_net(string& tnn_fileName)
             if(str == "in_channels") token >> in_channels;
             if(str == "pool_size_x") token >> pool_size_x;
             if(str == "pool_size_y") token >> pool_size_y;
+            if(str == "stride_x") token >> stride_x;
+            if(str == "stride_y") token >> stride_y;
+            if(str == "padding") token >> pad;
         }
         if(in_width % pool_size_x != 0)
         {
@@ -153,9 +186,18 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         {
             cout << "#average_pooling_layer " << i+1 << " : in_height/pool_size_y = " << in_height << "/" << pool_size_y << " cannot divisible !\n";
         }
-        nn << average_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y);
-        layer_width_in = in_width/pool_size_x;
-        layer_height_in = in_height/pool_size_y;
+		if(pad == "same")
+		{
+          nn << average_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y, stride_x, stride_y, padding::same);
+          layer_width_in = in_width;
+          layer_height_in = in_height;
+		}
+		else
+		{
+          nn << average_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y, stride_x, stride_y, padding::valid);
+          layer_width_in = in_width/pool_size_x;
+          layer_height_in = in_height/pool_size_y;
+		}
     }
     if(layer_name == "fully_connected_layer")
     {
@@ -169,10 +211,10 @@ bool TNN_Network::construct_net(string& tnn_fileName)
             if(str == "has_bias")
             {
                 token >> str;
-                if(str == "true")
-                    has_bias = true;
-                else if(str == "false")
+                if(str == "false")
                     has_bias = false;
+                else
+                    has_bias = true;
             }
         }
         nn << fully_connected_layer(in_dim, out_dim, has_bias);
@@ -185,6 +227,9 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         int in_channels = layer_channel_in;//sthe number of input image channels(depth)
         int pool_size_x = 2;//factor by which to downscale
         int pool_size_y = 2;//factor by which to downscale
+		int stride_x = 1;//interval at which to apply the ﬁlters to the input 
+		int stride_y = 1;//interval at which to apply the ﬁlters to the input 
+		string pad = "valid";//padding mode(same/valid)
         while(token >> str)
         {
             if(str == "in_width") token >> in_width;
@@ -192,6 +237,9 @@ bool TNN_Network::construct_net(string& tnn_fileName)
             if(str == "in_channels") token >> in_channels;
             if(str == "pool_size_x") token >> pool_size_x;
             if(str == "pool_size_y") token >> pool_size_y;
+            if(str == "stride_x") token >> stride_x;
+            if(str == "stride_y") token >> stride_y;
+            if(str == "padding") token >> pad;
         }
         if(in_width % pool_size_x != 0)
         {
@@ -201,10 +249,31 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         {
             cout << "#max_pooling_layer " << i+1 << " : in_height/pool_size_y = " << in_height << "/" << pool_size_y << " cannot divisible !\n";
         }
-        nn << max_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y);
-        layer_width_in = in_width/pool_size_x;
-        layer_height_in = in_height/pool_size_y;
+		if(pad == "same")
+		{
+          nn << max_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y, stride_x, stride_y, padding::same, core::default_engine());
+          layer_width_in = in_width;
+          layer_height_in = in_height;
+		}
+		else
+		{
+          nn << max_pooling_layer(in_width, in_height, in_channels, pool_size_x, pool_size_y, stride_x, stride_y, padding::valid, core::default_engine());
+          layer_width_in = in_width/pool_size_x;
+          layer_height_in = in_height/pool_size_y;
+		}
     }
+    if(layer_name == "dropout_layer")
+    {
+        int in_dim = layer_channel_in;//number of elements of the input 
+        float dropout_rate = 0.5;//input image height
+        while(token >> str)
+        {
+            if(str == "in_dim") token >> in_dim;
+            if(str == "dropout_rate") token >>  dropout_rate;
+        }
+        nn << dropout_layer(in_dim,  dropout_rate);
+    }
+	
     if(layer_name == "elu_layer")
         nn << elu_layer();
     if(layer_name == "leaky_relu_layer")

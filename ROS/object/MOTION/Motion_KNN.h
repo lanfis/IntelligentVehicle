@@ -34,6 +34,7 @@ class MOTION_KNN
       int min_box_length;
       int max_box_length;
       int num_detect_;  
+	  float line_ratio = 0.20;
     
     private:
 	  Mat fgMask;
@@ -93,6 +94,7 @@ void MOTION_KNN::detect(Mat& fgMask, vector<Rect>& boundBox)
     {
       Rect bound = boundingRect( Mat(contours[i]) );
       if(bound.width < min_box_length || bound.height < min_box_length || bound.width > max_box_length || bound.height > max_box_length) continue;
+	  if(float(bound.width) < line_ratio * float(bound.height) || float(bound.height) < line_ratio * float(bound.width)) continue;
       //boundRect[i] = bound;//boundingRect( Mat(contours[i]) );
       boundBox.push_back(bound);
       //rectangle( img_current, bound.tl(), bound.br(), cv::Scalar(0, 128, 0), 2, 8, 0 );
@@ -104,13 +106,13 @@ void MOTION_KNN::detect(Mat& fgMask, vector<Rect>& boundBox)
 void MOTION_KNN::adjust()
 {
   if(!auto_adjust) return;
-  if(num_detect_ == 0)
+  if(num_detect_ != 0)
   {
-    learning_rate = (learning_rate - 1.0/history < 0)? 1.0/history/100.0 : learning_rate - 1.0/history;
+    learning_rate = (learning_rate - 1.0/history < 0)? 1.0/history : learning_rate - 10.0/history;
   }
   else
   {
-	learning_rate = (learning_rate + 1.0/history > 1.0)? 1.0 : learning_rate + 1.0/history/100.0;
+	learning_rate = (learning_rate + 1.0/history > 0.2)? 0.2 : learning_rate + 1.0/history;
   }
 }
 

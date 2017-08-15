@@ -191,10 +191,10 @@ void Motion_Detector_KNN::run()
     }
     motion_knn -> run(this -> image, this -> image_motion, motion_box);
     //image.copyTo(image_motion);
-    for(int i = 0; i < motion_box.size(); i++)
+    /*for(int i = 0; i < motion_box.size(); i++)
     {
        rectangle( image, motion_box[i], cv::Scalar(0, 255, 0), 2, 8, 0 );
-    }
+    }*/
     roi_publish();
     motion_box.clear();
     image_motion_publish();
