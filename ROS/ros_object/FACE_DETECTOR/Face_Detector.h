@@ -32,7 +32,7 @@ class Face_Detector
   public:
     string nodeName = "Face_Detector";
     string topic_image_sub = "Face_Detector/image";
-	string topic_image_detect_pub = "Face_Detector/image_detect";
+    string topic_image_detect_pub = "Face_Detector/image_detect";
     string topic_image_face_pub = "Face_Detector/image_face";
     string topic_image_fullbody_pub = "Face_Detector/image_fullbody";
     string topic_image_upperbody_pub = "Face_Detector/image_upperbody";
