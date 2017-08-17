@@ -16,7 +16,8 @@ using namespace boost::filesystem;
 using namespace std;
 using namespace cv;
 
-const string static_path = "/../ROS/ros_object/FACE/data";
+//const string static_path = "/../ROS/ros_object/FACE/data";
+const string static_path = "/data";
 
 class Face_Detector_Cascade
 {
