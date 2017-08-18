@@ -5,8 +5,6 @@
 #include <string>
 #include <cstring>
 #include <ros/ros.h>
-#include <ros/spinner.h>
-#include <nodelet/nodelet.h>
 #include <std_msgs/Float32.h>
 
 using namespace ros;
