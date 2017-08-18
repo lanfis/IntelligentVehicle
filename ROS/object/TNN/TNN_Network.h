@@ -227,8 +227,8 @@ bool TNN_Network::construct_net(string& tnn_fileName)
         int in_channels = layer_channel_in;//sthe number of input image channels(depth)
         int pool_size_x = 2;//factor by which to downscale
         int pool_size_y = 2;//factor by which to downscale
-		int stride_x = 1;//interval at which to apply the ﬁlters to the input 
-		int stride_y = 1;//interval at which to apply the ﬁlters to the input 
+		int stride_x = 2;//interval at which to apply the ﬁlters to the input 
+		int stride_y = 2;//interval at which to apply the ﬁlters to the input 
 		string pad = "valid";//padding mode(same/valid)
         while(token >> str)
         {

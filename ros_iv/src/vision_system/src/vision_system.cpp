@@ -37,6 +37,12 @@ int main(int argc, char** argv)
   nodelet_loader.load(nodelet_image_tracker_name, "image_tracker_nodelet/image_tracker", remap_image_tracker, nargv_image_tracker);
   ROS_INFO("%s activating ok !", nodelet_image_tracker_name.c_str());
   
+  nodelet::M_string remap_face_detector(ros::names::getRemappings());
+  nodelet::V_string nargv_face_detector;
+  std::string nodelet_face_detector_name = "face_detector";
+  nodelet_loader.load(nodelet_face_detector_name, "face_detector_nodelet/face_detector", remap_face_detector, nargv_face_detector);
+  ROS_INFO("%s activating ok !", nodelet_face_detector_name.c_str());
+  
   while (ros::ok()) 
   {
     vs.run();

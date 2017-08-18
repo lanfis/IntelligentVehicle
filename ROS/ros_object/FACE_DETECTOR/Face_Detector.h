@@ -50,12 +50,12 @@ class Face_Detector
     cv_bridge::CvImageConstPtr/*CvImagePtr*/ cv_ptr;
     image_transport::SubscriberStatusCallback connect_cb_image_detect;
     image_transport::SubscriberStatusCallback disconnect_cb_image_detect;
-    ros::SubscriberStatusCallback connect_cb_face;
-    ros::SubscriberStatusCallback disconnect_cb_face;
-    ros::SubscriberStatusCallback connect_cb_fullbody;
-    ros::SubscriberStatusCallback disconnect_cb_fullbody;
-    ros::SubscriberStatusCallback connect_cb_upperbody;
-    ros::SubscriberStatusCallback disconnect_cb_upperbody;
+    ros::SubscriberStatusCallback connect_cb_image_face;
+    ros::SubscriberStatusCallback disconnect_cb_image_face;
+    ros::SubscriberStatusCallback connect_cb_image_fullbody;
+    ros::SubscriberStatusCallback disconnect_cb_image_fullbody;
+    ros::SubscriberStatusCallback connect_cb_image_upperbody;
+    ros::SubscriberStatusCallback disconnect_cb_image_upperbody;
       
     image_transport::Subscriber it_sub_;
     image_transport::Publisher it_detect_pub_;
@@ -78,84 +78,108 @@ class Face_Detector
     {
       if(it_detect_pub_.getNumSubscribers() > 1) return;
       ROS_INFO("%s connected !", topic_image_detect_pub.c_str());
-      flag_motion_image = true;
-      if(!(flag_motion_image & flag_motion_roi))
+      if(!flag_face_image)
       {
-        sub_init();
+        flag_face_image = true;
+        if(!(flag_image_face | flag_image_fullbody | flag_image_upperbody))
+        {
+          sub_init();
+          flag_image_face = true;//extra parameter
+//          flag_image_fullbody = true;//extra parameter
+        }
       }
     }
     void disconnectCb_image_detect(const image_transport::SingleSubscriberPublisher&)
     {
       if(it_detect_pub_.getNumSubscribers() > 0) return;
       ROS_WARN("%s disconnected !", topic_image_detect_pub.c_str());
-      flag_motion_image = false;
-      if(!(flag_motion_image | flag_motion_roi))
+      if(flag_face_image)
       {
-        flag_motion_init = false;
-        sub_shutdown();
+        flag_face_image = false;
+        flag_image_face = false;//extra parameter
+//        flag_image_fullbody = false;//extra parameter
+        if(!(flag_image_face | flag_image_fullbody | flag_image_upperbody))
+        {
+          sub_shutdown();
+        }
       }
     }
     void connectCb_image_face(const ros::SingleSubscriberPublisher& ssp)
     {
       if(image_face_pub_.getNumSubscribers() > 1) return;
       ROS_INFO("%s connected !", topic_image_face_pub.c_str());
-      flag_motion_roi = true;
-      if(!(flag_motion_image & flag_motion_roi))
+      if(!flag_image_face)
       {
-        sub_init();
+        flag_image_face = true;
+        if(!(flag_face_image | flag_image_fullbody | flag_image_upperbody))
+        {
+          sub_init();
+        }
       }
     }
     void disconnectCb_image_face(const ros::SingleSubscriberPublisher&)
     {
       if(image_face_pub_.getNumSubscribers() > 0) return;
       ROS_WARN("%s disconnected !", topic_image_face_pub.c_str());
-      flag_motion_roi = false;
-      if(!(flag_motion_image | flag_motion_roi))
+      if(flag_image_face)
       {
-        flag_motion_init = false;
-        sub_shutdown();
+        flag_image_face = false;
+        if(!(flag_face_image | flag_image_fullbody | flag_image_upperbody))
+        {
+          sub_shutdown();
+        }
       }
     }
     void connectCb_image_fullbody(const ros::SingleSubscriberPublisher& ssp)
     {
       if(image_fullbody_pub_.getNumSubscribers() > 1) return;
       ROS_INFO("%s connected !", topic_image_fullbody_pub.c_str());
-      flag_motion_roi = true;
-      if(!(flag_motion_image & flag_motion_roi))
+      if(!flag_image_fullbody)
       {
-        sub_init();
+        flag_image_fullbody = true;
+        if(!(flag_face_image | flag_image_face | flag_image_upperbody))
+        {
+          sub_init();
+        }
       }
     }
     void disconnectCb_image_fullbody(const ros::SingleSubscriberPublisher&)
     {
       if(image_fullbody_pub_.getNumSubscribers() > 0) return;
       ROS_WARN("%s disconnected !", topic_image_fullbody_pub.c_str());
-      flag_motion_roi = false;
-      if(!(flag_motion_image | flag_motion_roi))
+      if(flag_image_fullbody)
       {
-        flag_motion_init = false;
-        sub_shutdown();
+        flag_image_fullbody = false;
+        if(!(flag_face_image | flag_image_face | flag_image_upperbody))
+        {
+          sub_shutdown();
+        }
       }
     }
     void connectCb_image_upperbody(const ros::SingleSubscriberPublisher& ssp)
     {
       if(image_upperbody_pub_.getNumSubscribers() > 1) return;
       ROS_INFO("%s connected !", topic_image_upperbody_pub.c_str());
-      flag_motion_roi = true;
-      if(!(flag_motion_image & flag_motion_roi))
+      if(!flag_image_upperbody)
       {
-        sub_init();
+        flag_image_upperbody = true;
+        if(!(flag_face_image | flag_image_face | flag_image_fullbody))
+        {
+          sub_init();
+        }
       }
     }
     void disconnectCb_image_upperbody(const ros::SingleSubscriberPublisher&)
     {
       if(image_upperbody_pub_.getNumSubscribers() > 0) return;
       ROS_WARN("%s disconnected !", topic_image_upperbody_pub.c_str());
-      flag_motion_roi = false;
-      if(!(flag_motion_image | flag_motion_roi))
+      if(flag_image_upperbody)
       {
-        flag_motion_init = false;
-        sub_shutdown();
+        flag_image_upperbody = false;
+        if(!(flag_face_image | flag_image_face | flag_image_fullbody))
+        {
+          sub_shutdown();
+        }
       }
     }
     
@@ -169,9 +193,13 @@ class Face_Detector
   private:
     Face_Detector_Cascade *fdc;
     Mat image;
-    bool flag_motion_image = false;
-    bool flag_motion_roi = false;
-    bool flag_motion_init = false;
+    bool activation_image_face = true;
+    bool activation_image_fullbody = false;
+    bool activation_image_upperbody = false;
+    bool flag_face_image = false;
+    bool flag_image_face = false;
+    bool flag_image_fullbody = false;
+    bool flag_image_upperbody = false;
 
   public:
     Face_Detector(ros::NodeHandle& nh);
@@ -188,12 +216,12 @@ class Face_Detector
       msg_image_detect = boost::shared_ptr<sensor_msgs::Image>(new sensor_msgs::Image);
       connect_cb_image_detect    = boost::bind(&Face_Detector::connectCb_image_detect, this, _1);
       disconnect_cb_image_detect = boost::bind(&Face_Detector::disconnectCb_image_detect, this, _1);
-      connect_cb_face    = boost::bind(&Face_Detector::connectCb_image_face, this, _1);
-      disconnect_cb_face = boost::bind(&Face_Detector::disconnectCb_image_face, this, _1);
-      connect_cb_fullbody    = boost::bind(&Face_Detector::connectCb_image_fullbody, this, _1);
-      disconnect_cb_fullbody = boost::bind(&Face_Detector::disconnectCb_image_fullbody, this, _1);
-      connect_cb_upperbody    = boost::bind(&Face_Detector::connectCb_image_upperbody, this, _1);
-      disconnect_cb_upperbody = boost::bind(&Face_Detector::disconnectCb_image_upperbody, this, _1);
+      connect_cb_image_face    = boost::bind(&Face_Detector::connectCb_image_face, this, _1);
+      disconnect_cb_image_face = boost::bind(&Face_Detector::disconnectCb_image_face, this, _1);
+      connect_cb_image_fullbody    = boost::bind(&Face_Detector::connectCb_image_fullbody, this, _1);
+      disconnect_cb_image_fullbody = boost::bind(&Face_Detector::disconnectCb_image_fullbody, this, _1);
+      connect_cb_image_upperbody    = boost::bind(&Face_Detector::connectCb_image_upperbody, this, _1);
+      disconnect_cb_image_upperbody = boost::bind(&Face_Detector::disconnectCb_image_upperbody, this, _1);
       pub_init();
       pub_topic_get();
       //sub_init();
@@ -214,18 +242,30 @@ Face_Detector::~Face_Detector()
 
 void Face_Detector::run()
 {  
-    fdc -> fullbody_detect(this -> image);
-    fdc -> upperbody_detect(this -> image);
-    fdc -> face_detect(this -> image);
-    for(int i = 0; i < motion_box.size(); i++)
+    if(activation_image_fullbody & flag_image_fullbody) fdc -> fullbody_detect(this -> image);
+    if(activation_image_upperbody & flag_image_upperbody) fdc -> upperbody_detect(this -> image);
+    if(activation_image_face & flag_image_face) fdc -> face_detect(this -> image);
+    for(int i = 0; i < fdc -> fullbody.size(); i++)
     {
        rectangle( image, fdc -> fullbody[i], cv::Scalar(0, 255, 0), 1, 8, 0 );
     }
+    for(int i = 0; i < fdc -> upperbody.size(); i++)
+    {
+       rectangle( image, fdc -> upperbody[i], cv::Scalar(0, 255, 255), 1, 8, 0 );
+    }
+    for(int i = 0; i < fdc -> face.size(); i++)
+    {
+       rectangle( image, fdc -> face[i], cv::Scalar(0, 0, 255), 1, 8, 0 );
+    }
+    image_detect_publish();
+    image_face_publish();
+    image_fullbody_publish();
+    image_upperbody_publish();
 }
 
 void Face_Detector::image_detect_publish()
 {
-  if(!flag_motion_image) return;
+  if(!flag_face_image) return;
   //sensor_msgs::ImagePtr msg_image(new sensor_msgs::Image);
   msg_image = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
   //sensor_msgs::ImagePtr msg_image;
@@ -266,82 +306,126 @@ void Face_Detector::auto_adjust_callBack(const std_msgs::Bool::ConstPtr& msg)
     fdc -> auto_adjust = msg -> data;
 }
 */
-    void image_detect_publish();
-    void image_face_publish();
-    void image_fullbody_publish();
-    void image_upperbody_publish();
+
+void Face_Detector::image_face_publish()
+{
+    if(!flag_image_face) return;
+    sensor_msgs::RegionOfInterest msg;
+    for(int i = 0; i < fdc -> face.size(); i++)
+    {
+      msg.x_offset = fdc -> face[i].x + fdc -> face[i].width/2;      
+      msg.y_offset = fdc -> face[i].y + fdc -> face[i].height/2;      
+      msg.width    = fdc -> face[i].width;      
+      msg.height   = fdc -> face[i].height;     
+      image_face_pub_.publish(msg);
+    }
+}
 
 void Face_Detector::image_fullbody_publish()
 {
-    if(!flag_motion_roi) return;
+    if(!flag_image_fullbody) return;
     sensor_msgs::RegionOfInterest msg;
-    for(int i = 0; i < motion_box.size(); i++)
+    for(int i = 0; i < fdc -> fullbody.size(); i++)
     {
       msg.x_offset = fdc -> fullbody[i].x + fdc -> fullbody[i].width/2;      
       msg.y_offset = fdc -> fullbody[i].y + fdc -> fullbody[i].height/2;      
       msg.width    = fdc -> fullbody[i].width;      
       msg.height   = fdc -> fullbody[i].height;     
-      image_face_pub_.publish(msg);
+      image_fullbody_pub_.publish(msg);
+    }
+}
+
+void Face_Detector::image_upperbody_publish()
+{
+    if(!flag_image_upperbody) return;
+    sensor_msgs::RegionOfInterest msg;
+    for(int i = 0; i < fdc -> fullbody.size(); i++)
+    {
+      msg.x_offset = fdc -> upperbody[i].x + fdc -> upperbody[i].width/2;      
+      msg.y_offset = fdc -> upperbody[i].y + fdc -> upperbody[i].height/2;      
+      msg.width    = fdc -> upperbody[i].width;      
+      msg.height   = fdc -> upperbody[i].height;     
+      image_upperbody_pub_.publish(msg);
     }
 }
     
 void Face_Detector::pub_topic_get()
 {
-    topic_image_face_pub = it_detect_pub_.getTopic();
-    topic_motion_roi_pub = image_face_pub_.getTopic();
+    topic_image_detect_pub = it_detect_pub_.getTopic();
+    topic_image_face_pub = image_face_pub_.getTopic();
+    topic_image_fullbody_pub = image_fullbody_pub_.getTopic();
+    topic_image_upperbody_pub = image_upperbody_pub_.getTopic();
 }
 
 void Face_Detector::pub_init()
 {
-    ROS_INFO("Publisher %s initiating !", topic_image_sub.c_str());
-    it_detect_pub_ = it_detect_ -> advertise(topic_image_face_pub, queue_size, connect_cb_image_detect, disconnect_cb_image_detect);
-    ROS_INFO("Publisher %s initiating !", topic_motion_roi_pub.c_str());
-    image_face_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_motion_roi_pub.c_str(), queue_size, connect_cb_face, disconnect_cb_face);
+    ROS_INFO("Publisher %s initiating !", topic_image_detect_pub.c_str());
+    it_detect_pub_ = it_detect_ -> advertise(topic_image_detect_pub, queue_size, connect_cb_image_detect, disconnect_cb_image_detect);
+    ROS_INFO("Publisher %s initiating !", topic_image_face_pub.c_str());
+    image_face_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_face_pub.c_str(), queue_size, connect_cb_image_face, disconnect_cb_image_face);
+    ROS_INFO("Publisher %s initiating !", topic_image_fullbody_pub.c_str());
+    image_fullbody_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_fullbody_pub.c_str(), queue_size, connect_cb_image_fullbody, disconnect_cb_image_fullbody);
+    ROS_INFO("Publisher %s initiating !", topic_image_upperbody_pub.c_str());
+    image_upperbody_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_upperbody_pub.c_str(), queue_size, connect_cb_image_upperbody, disconnect_cb_image_upperbody);
 }
 
 void Face_Detector::pub_shutdown()
 {
-    ROS_WARN("Publisher %s shuting down !", topic_image_face_pub.c_str());
+    ROS_WARN("Publisher %s shuting down !", topic_image_detect_pub.c_str());
     it_detect_pub_.shutdown();
-    ROS_WARN("Publisher %s shuting down !", topic_motion_roi_pub.c_str());
+    ROS_WARN("Publisher %s shuting down !", topic_image_face_pub.c_str());
     image_face_pub_.shutdown();
+    ROS_WARN("Publisher %s shuting down !", topic_image_fullbody_pub.c_str());
+    image_fullbody_pub_.shutdown();
+    ROS_WARN("Publisher %s shuting down !", topic_image_upperbody_pub.c_str());
+    image_upperbody_pub_.shutdown();
 }
 
 void Face_Detector::sub_topic_get()
 {   
     topic_image_sub = it_sub_.getTopic();
+/*
     topic_image_fullbody_pub = image_face_pub_.getTopic();
     topic_image_upperbody_pub = image_fullbody_pub_.getTopic();
     topic_auto_adjust_sub = auto_adjust_sub_.getTopic();
-    sub_manual_topic_get();
+*/
+//    sub_manual_topic_get();
 }
 
 void Face_Detector::sub_init()
 {
     ROS_INFO("Subscriber %s initiating !", topic_image_sub.c_str());
     it_sub_ = it_ -> subscribe(topic_image_sub.c_str(), queue_size, &Face_Detector::image_callBack, this);
+/*
+    ROS_INFO("Subscriber %s initiating !", topic_image_face_pub.c_str());
+    image_face_pub_ = n_.subscribe(topic_image_face_pub.c_str(), queue_size, &Face_Detector::min_box_length_ratio_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_image_fullbody_pub.c_str());
-    image_face_pub_ = n_.subscribe(topic_image_fullbody_pub.c_str(), queue_size, &Face_Detector::min_box_length_ratio_callBack, this);
+    image_fullbody_pub_ = n_.subscribe(topic_image_fullbody_pub.c_str(), queue_size, &Face_Detector::min_box_length_ratio_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_image_upperbody_pub.c_str());
-    image_fullbody_pub_ = n_.subscribe(topic_image_upperbody_pub.c_str(), queue_size, &Face_Detector::max_box_length_ratio_callBack, this);
+    image_upperbody_pub_ = n_.subscribe(topic_image_upperbody_pub.c_str(), queue_size, &Face_Detector::max_box_length_ratio_callBack, this);
     ROS_INFO("Subscriber %s initiating !", topic_auto_adjust_sub.c_str());
     auto_adjust_sub_ = n_.subscribe(topic_auto_adjust_sub.c_str(), queue_size, &Face_Detector::auto_adjust_callBack, this);
-    sub_manual_init();
+*/
+//    sub_manual_init();
 }
 
 void Face_Detector::sub_shutdown()
 {
     ROS_WARN("Subscriber %s shuting down !", topic_image_sub.c_str());
     it_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_image_fullbody_pub.c_str());
+/*
+    ROS_WARN("Subscriber %s shuting down !", topic_image_face_pub.c_str());
     image_face_pub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_image_upperbody_pub.c_str());
+    ROS_WARN("Subscriber %s shuting down !", topic_image_fullbody_pub.c_str());
     image_fullbody_pub_.shutdown();
+    ROS_WARN("Subscriber %s shuting down !", topic_image_upperbody_pub.c_str());
+    image_upperbody_pub_.shutdown();
     ROS_WARN("Subscriber %s shuting down !", topic_auto_adjust_sub.c_str());
     auto_adjust_sub_.shutdown();
-    sub_manual_shutdown();
+*/
+//    sub_manual_shutdown();
 }
-
+/*
 void Face_Detector::sub_manual_topic_get()
 {   
     if(fdc -> auto_adjust) return;
@@ -376,5 +460,6 @@ void Face_Detector::sub_manual_shutdown()
     ROS_WARN("Subscriber %s shuting down !", topic_num_detect_diff_sub.c_str());
     num_detect_diff_sub_.shutdown();
 }
+*/
 #endif
 

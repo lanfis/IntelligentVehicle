@@ -21,3 +21,12 @@
   </description>
   </class>
 </library>
+
+
+<library path="lib/libface_detector">
+  <class name="face_detector_nodelet/face_detector" type="face_detector_nodelet::face_detector" base_class_type="nodelet::Nodelet">
+  <description>
+  This is my nodelet.
+  </description>
+  </class>
+</library>

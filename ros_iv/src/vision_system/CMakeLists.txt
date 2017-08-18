@@ -224,6 +224,9 @@ target_link_libraries(motion_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_library(image_tracker SHARED ../../../ROS/ros_package/VISION_SYSTEM/image_tracker.cpp ../../../ROS/object/KCF/fhog.cpp ../../../ROS/object/KCF/kcftracker.cpp)
 target_link_libraries(image_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_library(face_detector SHARED ../../../ROS/ros_package/VISION_SYSTEM/face_detector.cpp)
+target_link_libraries(face_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
 add_executable(vision_system src/vision_system.cpp)
 target_link_libraries(vision_system ${catkin_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
 add_dependencies(vision_system vision_system)

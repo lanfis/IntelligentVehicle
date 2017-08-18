@@ -2,6 +2,7 @@
   <node name="vision_system" pkg="vision_system" type="vision_system" respawn="false" output="screen">
       <remap from="/Camera_Focus/image" to="/pic_sim/image_raw"/>
       <remap from="/Motion_Detector/image" to="/pic_sim/image_raw"/>
+      <remap from="/Face_Detector/image" to="/pic_sim/image_raw"/>
   </node>
   
   <node name="viewer" pkg="viewer" type="viewer" respawn="false" output="screen">
