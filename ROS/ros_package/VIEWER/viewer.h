@@ -77,11 +77,14 @@ class Viewer
     cv_bridge::CvImagePtr cv_ptr;
 /*
     bool useExact = true;
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ExactSyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ApproximateSyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::RegionOfInterest> ExactSyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::RegionOfInterest> ApproximateSyncPolicy;
     message_filters::Synchronizer<ExactSyncPolicy> *syncExact;
     message_filters::Synchronizer<ApproximateSyncPolicy> *syncApproximate;
-*/    
+    image_transport::SubscriberFilter *subImageColor, *subImageDepth;
+    subImageColor = new image_transport::SubscriberFilter(it, topicColor, queueSize, hints);
+    subImageDepth = new image_transport::SubscriberFilter(it, topicDepth, queueSize, hints);
+*/   
     image_transport::Subscriber viewer_image_sub_;
     image_transport::Publisher viewer_image_pub_;
     ros::Subscriber viewer_activation_sub_;
@@ -351,18 +354,7 @@ void Viewer::pub_init()
 {
   viewer_image_pub_ = it_pub_.advertise(topic_image_pub.c_str(), queue_size);
   viewer_status_pub_ = n_.advertise< std_msgs::String>(topic_status_pub.c_str(), queue_size);
-/*
-  if(useExact)
-  {
-    syncExact = new message_filters::Synchronizer<ExactSyncPolicy>(ExactSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
-    syncExact->registerCallback(boost::bind(&Viewer::callback, this, _1, _2, _3, _4));
-  }
-  else
-  {
-    syncApproximate = new message_filters::Synchronizer<ApproximateSyncPolicy>(ApproximateSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
-    syncApproximate->registerCallback(boost::bind(&Viewer::callback, this, _1, _2, _3, _4));
-  }
-*/
+
 }
 
 void Viewer::pub_shutdown()
@@ -387,7 +379,17 @@ void Viewer::sub_topic_get()
 }
 
 void Viewer::sub_init()
-{
+{/*
+  if(useExact)
+  {
+    syncExact = new message_filters::Synchronizer<ExactSyncPolicy>(ExactSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
+    syncExact->registerCallback(boost::bind(&Viewer::image_callBack, this, _1, _2));
+  }
+  else
+  {
+    syncApproximate = new message_filters::Synchronizer<ApproximateSyncPolicy>(ApproximateSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
+    syncApproximate->registerCallback(boost::bind(&Viewer::image_callBack, this, _1, _2));
+  }*/
   viewer_image_sub_ = it_sub_.subscribe(topic_image_sub.c_str(), queue_size, &Viewer::image_callBack, this);
   viewer_activation_sub_ = n_.subscribe(topic_activation_sub.c_str(), queue_size, &Viewer::activation_callBack, this);
   viewer_roi_sub_ = n_.subscribe(topic_roi_sub.c_str(), queue_size, &Viewer::roi_callBack, this);

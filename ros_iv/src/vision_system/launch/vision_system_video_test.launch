@@ -7,6 +7,6 @@
   
   <node name="viewer" pkg="viewer" type="viewer" respawn="false" output="screen">
     <remap from="Viewer/image_sub" to="/pic_sim/image_raw"/>
-    <remap from="Viewer/roi_sub" to="/Motion_Detector/motion_roi"/>
+    <remap from="Viewer/roi_sub" to="/Face_Detector/image_face"/>
   </node>
 </launch>

@@ -35,7 +35,7 @@ class Face_Detector
     string topic_image_detect_pub = "Face_Detector/image_detect";
     string topic_image_face_pub = "Face_Detector/image_face";
     string topic_image_fullbody_pub = "Face_Detector/image_fullbody";
-    string topic_image_upperbody_pub = "Face_Detector/image_upperbody";
+    string topic_image_cars_pub = "Face_Detector/image_cars";
     //string topic_auto_adjust_sub = "Face_Detector/auto_adjust";
     
   private:
@@ -54,14 +54,14 @@ class Face_Detector
     ros::SubscriberStatusCallback disconnect_cb_image_face;
     ros::SubscriberStatusCallback connect_cb_image_fullbody;
     ros::SubscriberStatusCallback disconnect_cb_image_fullbody;
-    ros::SubscriberStatusCallback connect_cb_image_upperbody;
-    ros::SubscriberStatusCallback disconnect_cb_image_upperbody;
+    ros::SubscriberStatusCallback connect_cb_image_cars;
+    ros::SubscriberStatusCallback disconnect_cb_image_cars;
       
     image_transport::Subscriber it_sub_;
     image_transport::Publisher it_detect_pub_;
     ros::Publisher image_face_pub_;
     ros::Publisher image_fullbody_pub_;
-    ros::Publisher image_upperbody_pub_;
+    ros::Publisher image_cars_pub_;
     //ros::Subscriber auto_adjust_sub_;
     
   private:
@@ -81,11 +81,11 @@ class Face_Detector
       if(!flag_face_image)
       {
         flag_face_image = true;
-        if(!(flag_image_face | flag_image_fullbody | flag_image_upperbody))
+        if(!(flag_image_face | flag_image_fullbody | flag_image_cars))
         {
           sub_init();
           flag_image_face = true;//extra parameter
-//          flag_image_fullbody = true;//extra parameter
+          flag_image_cars = true;//extra parameter
         }
       }
     }
@@ -97,8 +97,8 @@ class Face_Detector
       {
         flag_face_image = false;
         flag_image_face = false;//extra parameter
-//        flag_image_fullbody = false;//extra parameter
-        if(!(flag_image_face | flag_image_fullbody | flag_image_upperbody))
+        flag_image_cars = false;//extra parameter
+        if(!(flag_image_face | flag_image_fullbody | flag_image_cars))
         {
           sub_shutdown();
         }
@@ -111,7 +111,7 @@ class Face_Detector
       if(!flag_image_face)
       {
         flag_image_face = true;
-        if(!(flag_face_image | flag_image_fullbody | flag_image_upperbody))
+        if(!(flag_face_image | flag_image_fullbody | flag_image_cars))
         {
           sub_init();
         }
@@ -124,7 +124,7 @@ class Face_Detector
       if(flag_image_face)
       {
         flag_image_face = false;
-        if(!(flag_face_image | flag_image_fullbody | flag_image_upperbody))
+        if(!(flag_face_image | flag_image_fullbody | flag_image_cars))
         {
           sub_shutdown();
         }
@@ -137,7 +137,7 @@ class Face_Detector
       if(!flag_image_fullbody)
       {
         flag_image_fullbody = true;
-        if(!(flag_face_image | flag_image_face | flag_image_upperbody))
+        if(!(flag_face_image | flag_image_face | flag_image_cars))
         {
           sub_init();
         }
@@ -150,32 +150,32 @@ class Face_Detector
       if(flag_image_fullbody)
       {
         flag_image_fullbody = false;
-        if(!(flag_face_image | flag_image_face | flag_image_upperbody))
+        if(!(flag_face_image | flag_image_face | flag_image_cars))
         {
           sub_shutdown();
         }
       }
     }
-    void connectCb_image_upperbody(const ros::SingleSubscriberPublisher& ssp)
+    void connectCb_image_cars(const ros::SingleSubscriberPublisher& ssp)
     {
-      if(image_upperbody_pub_.getNumSubscribers() > 1) return;
-      ROS_INFO("%s connected !", topic_image_upperbody_pub.c_str());
-      if(!flag_image_upperbody)
+      if(image_cars_pub_.getNumSubscribers() > 1) return;
+      ROS_INFO("%s connected !", topic_image_cars_pub.c_str());
+      if(!flag_image_cars)
       {
-        flag_image_upperbody = true;
+        flag_image_cars = true;
         if(!(flag_face_image | flag_image_face | flag_image_fullbody))
         {
           sub_init();
         }
       }
     }
-    void disconnectCb_image_upperbody(const ros::SingleSubscriberPublisher&)
+    void disconnectCb_image_cars(const ros::SingleSubscriberPublisher&)
     {
-      if(image_upperbody_pub_.getNumSubscribers() > 0) return;
-      ROS_WARN("%s disconnected !", topic_image_upperbody_pub.c_str());
-      if(flag_image_upperbody)
+      if(image_cars_pub_.getNumSubscribers() > 0) return;
+      ROS_WARN("%s disconnected !", topic_image_cars_pub.c_str());
+      if(flag_image_cars)
       {
-        flag_image_upperbody = false;
+        flag_image_cars = false;
         if(!(flag_face_image | flag_image_face | flag_image_fullbody))
         {
           sub_shutdown();
@@ -188,18 +188,18 @@ class Face_Detector
     void image_detect_publish();
     void image_face_publish();
     void image_fullbody_publish();
-    void image_upperbody_publish();
+    void image_cars_publish();
     
   private:
     Face_Detector_Cascade *fdc;
     Mat image;
     bool activation_image_face = true;
     bool activation_image_fullbody = false;
-    bool activation_image_upperbody = false;
+    bool activation_image_cars = true;
     bool flag_face_image = false;
     bool flag_image_face = false;
     bool flag_image_fullbody = false;
-    bool flag_image_upperbody = false;
+    bool flag_image_cars = false;
 
   public:
     Face_Detector(ros::NodeHandle& nh);
@@ -220,8 +220,8 @@ class Face_Detector
       disconnect_cb_image_face = boost::bind(&Face_Detector::disconnectCb_image_face, this, _1);
       connect_cb_image_fullbody    = boost::bind(&Face_Detector::connectCb_image_fullbody, this, _1);
       disconnect_cb_image_fullbody = boost::bind(&Face_Detector::disconnectCb_image_fullbody, this, _1);
-      connect_cb_image_upperbody    = boost::bind(&Face_Detector::connectCb_image_upperbody, this, _1);
-      disconnect_cb_image_upperbody = boost::bind(&Face_Detector::disconnectCb_image_upperbody, this, _1);
+      connect_cb_image_cars    = boost::bind(&Face_Detector::connectCb_image_cars, this, _1);
+      disconnect_cb_image_cars = boost::bind(&Face_Detector::disconnectCb_image_cars, this, _1);
       pub_init();
       pub_topic_get();
       //sub_init();
@@ -243,15 +243,15 @@ Face_Detector::~Face_Detector()
 void Face_Detector::run()
 {  
     if(activation_image_fullbody & flag_image_fullbody) fdc -> fullbody_detect(this -> image);
-    if(activation_image_upperbody & flag_image_upperbody) fdc -> upperbody_detect(this -> image);
+    if(activation_image_cars & flag_image_cars) fdc -> cars_detect(this -> image);
     if(activation_image_face & flag_image_face) fdc -> face_detect(this -> image);
     for(int i = 0; i < fdc -> fullbody.size(); i++)
     {
        rectangle( image, fdc -> fullbody[i], cv::Scalar(0, 255, 0), 1, 8, 0 );
     }
-    for(int i = 0; i < fdc -> upperbody.size(); i++)
+    for(int i = 0; i < fdc -> cars.size(); i++)
     {
-       rectangle( image, fdc -> upperbody[i], cv::Scalar(0, 255, 255), 1, 8, 0 );
+       rectangle( image, fdc -> cars[i], cv::Scalar(0, 255, 255), 1, 8, 0 );
     }
     for(int i = 0; i < fdc -> face.size(); i++)
     {
@@ -260,7 +260,7 @@ void Face_Detector::run()
     image_detect_publish();
     image_face_publish();
     image_fullbody_publish();
-    image_upperbody_publish();
+    image_cars_publish();
 }
 
 void Face_Detector::image_detect_publish()
@@ -335,17 +335,17 @@ void Face_Detector::image_fullbody_publish()
     }
 }
 
-void Face_Detector::image_upperbody_publish()
+void Face_Detector::image_cars_publish()
 {
-    if(!flag_image_upperbody) return;
+    if(!flag_image_cars) return;
     sensor_msgs::RegionOfInterest msg;
     for(int i = 0; i < fdc -> fullbody.size(); i++)
     {
-      msg.x_offset = fdc -> upperbody[i].x + fdc -> upperbody[i].width/2;      
-      msg.y_offset = fdc -> upperbody[i].y + fdc -> upperbody[i].height/2;      
-      msg.width    = fdc -> upperbody[i].width;      
-      msg.height   = fdc -> upperbody[i].height;     
-      image_upperbody_pub_.publish(msg);
+      msg.x_offset = fdc -> cars[i].x + fdc -> cars[i].width/2;      
+      msg.y_offset = fdc -> cars[i].y + fdc -> cars[i].height/2;      
+      msg.width    = fdc -> cars[i].width;      
+      msg.height   = fdc -> cars[i].height;     
+      image_cars_pub_.publish(msg);
     }
 }
     
@@ -354,7 +354,7 @@ void Face_Detector::pub_topic_get()
     topic_image_detect_pub = it_detect_pub_.getTopic();
     topic_image_face_pub = image_face_pub_.getTopic();
     topic_image_fullbody_pub = image_fullbody_pub_.getTopic();
-    topic_image_upperbody_pub = image_upperbody_pub_.getTopic();
+    topic_image_cars_pub = image_cars_pub_.getTopic();
 }
 
 void Face_Detector::pub_init()
@@ -365,8 +365,8 @@ void Face_Detector::pub_init()
     image_face_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_face_pub.c_str(), queue_size, connect_cb_image_face, disconnect_cb_image_face);
     ROS_INFO("Publisher %s initiating !", topic_image_fullbody_pub.c_str());
     image_fullbody_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_fullbody_pub.c_str(), queue_size, connect_cb_image_fullbody, disconnect_cb_image_fullbody);
-    ROS_INFO("Publisher %s initiating !", topic_image_upperbody_pub.c_str());
-    image_upperbody_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_upperbody_pub.c_str(), queue_size, connect_cb_image_upperbody, disconnect_cb_image_upperbody);
+    ROS_INFO("Publisher %s initiating !", topic_image_cars_pub.c_str());
+    image_cars_pub_ = n_.advertise< sensor_msgs::RegionOfInterest>(topic_image_cars_pub.c_str(), queue_size, connect_cb_image_cars, disconnect_cb_image_cars);
 }
 
 void Face_Detector::pub_shutdown()
@@ -377,89 +377,26 @@ void Face_Detector::pub_shutdown()
     image_face_pub_.shutdown();
     ROS_WARN("Publisher %s shuting down !", topic_image_fullbody_pub.c_str());
     image_fullbody_pub_.shutdown();
-    ROS_WARN("Publisher %s shuting down !", topic_image_upperbody_pub.c_str());
-    image_upperbody_pub_.shutdown();
+    ROS_WARN("Publisher %s shuting down !", topic_image_cars_pub.c_str());
+    image_cars_pub_.shutdown();
 }
 
 void Face_Detector::sub_topic_get()
 {   
     topic_image_sub = it_sub_.getTopic();
-/*
-    topic_image_fullbody_pub = image_face_pub_.getTopic();
-    topic_image_upperbody_pub = image_fullbody_pub_.getTopic();
-    topic_auto_adjust_sub = auto_adjust_sub_.getTopic();
-*/
-//    sub_manual_topic_get();
 }
 
 void Face_Detector::sub_init()
 {
     ROS_INFO("Subscriber %s initiating !", topic_image_sub.c_str());
     it_sub_ = it_ -> subscribe(topic_image_sub.c_str(), queue_size, &Face_Detector::image_callBack, this);
-/*
-    ROS_INFO("Subscriber %s initiating !", topic_image_face_pub.c_str());
-    image_face_pub_ = n_.subscribe(topic_image_face_pub.c_str(), queue_size, &Face_Detector::min_box_length_ratio_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_image_fullbody_pub.c_str());
-    image_fullbody_pub_ = n_.subscribe(topic_image_fullbody_pub.c_str(), queue_size, &Face_Detector::min_box_length_ratio_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_image_upperbody_pub.c_str());
-    image_upperbody_pub_ = n_.subscribe(topic_image_upperbody_pub.c_str(), queue_size, &Face_Detector::max_box_length_ratio_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_auto_adjust_sub.c_str());
-    auto_adjust_sub_ = n_.subscribe(topic_auto_adjust_sub.c_str(), queue_size, &Face_Detector::auto_adjust_callBack, this);
-*/
-//    sub_manual_init();
 }
 
 void Face_Detector::sub_shutdown()
 {
     ROS_WARN("Subscriber %s shuting down !", topic_image_sub.c_str());
     it_sub_.shutdown();
-/*
-    ROS_WARN("Subscriber %s shuting down !", topic_image_face_pub.c_str());
-    image_face_pub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_image_fullbody_pub.c_str());
-    image_fullbody_pub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_image_upperbody_pub.c_str());
-    image_upperbody_pub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_auto_adjust_sub.c_str());
-    auto_adjust_sub_.shutdown();
-*/
-//    sub_manual_shutdown();
-}
-/*
-void Face_Detector::sub_manual_topic_get()
-{   
-    if(fdc -> auto_adjust) return;
-    topic_bg_filter_ksize_sub = bg_filter_ksize_sub_.getTopic();
-    topic_bg_filter_sigma_sub = bg_filter_sigma_sub_.getTopic();
-    topic_num_detect_sub = num_detect_sub_.getTopic();
-    topic_num_detect_diff_sub = num_detect_diff_sub_.getTopic();
 }
 
-void Face_Detector::sub_manual_init()
-{
-    if(fdc -> auto_adjust) return;
-    ROS_INFO("Subscriber %s initiating !", topic_bg_filter_ksize_sub.c_str());
-    bg_filter_ksize_sub_ = n_.subscribe(topic_bg_filter_ksize_sub.c_str(), queue_size, &Face_Detector::bg_filter_ksize_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_bg_filter_sigma_sub.c_str());
-    bg_filter_sigma_sub_ = n_.subscribe(topic_bg_filter_sigma_sub.c_str(), queue_size, &Face_Detector::bg_filter_sigma_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_num_detect_sub.c_str());
-    num_detect_sub_ = n_.subscribe(topic_num_detect_sub.c_str(), queue_size, &Face_Detector::num_detect_callBack, this);
-    ROS_INFO("Subscriber %s initiating !", topic_num_detect_diff_sub.c_str());
-    num_detect_diff_sub_ = n_.subscribe(topic_num_detect_diff_sub.c_str(), queue_size, &Face_Detector::num_detect_diff_callBack, this);
-}
-
-void Face_Detector::sub_manual_shutdown()
-{
-    if(fdc -> auto_adjust) return;
-    ROS_WARN("Subscriber %s shuting down !", topic_bg_filter_ksize_sub.c_str());
-    bg_filter_ksize_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_bg_filter_sigma_sub.c_str());
-    bg_filter_sigma_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_num_detect_sub.c_str());
-    num_detect_sub_.shutdown();
-    ROS_WARN("Subscriber %s shuting down !", topic_num_detect_diff_sub.c_str());
-    num_detect_diff_sub_.shutdown();
-}
-*/
 #endif
 
