@@ -7,3 +7,6 @@
 [submodule "ROS/object/DARKNET/darknet"]
 	path = ROS/object/DARKNET/darknet
 	url = https://github.com/pjreddie/darknet.git
+[submodule "ROS/object/TNN/tiny-dnn"]
+	path = ROS/object/TNN/tiny-dnn
+	url = https://github.com/tiny-dnn/tiny-dnn.git
