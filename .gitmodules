@@ -1,6 +1,3 @@
-[submodule "ROS/object/TNN/tiny-dnn"]
-	path = ROS/object/TNN/tiny-dnn
-	url = https://github.com/tiny-dnn/tiny-dnn.git
 [submodule "ros_iv/src/web_video_server"]
 	path = ros_iv/src/web_video_server
 	url = https://github.com/RobotWebTools/web_video_server.git
