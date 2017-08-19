@@ -154,7 +154,7 @@ Viewer::Viewer(int thread) : it_sub_(n_), it_pub_(n_), spinner(thread)
   flag_activation = true;
   flag_image_update = false;
   flag_roi_box_update = false;
-  window_activation = false;
+  window_activation = true;
   flag_window = false;
   
   pub_init();
