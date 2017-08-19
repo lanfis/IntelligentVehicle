@@ -10,8 +10,8 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 #include <vector>
-#include "TNN/tiny-dnn/tiny_dnn/tiny_dnn.h"
-#include "TNN/tiny-dnn/tiny_dnn/layers/layers.h"
+#include "tiny-dnn/tiny_dnn/tiny_dnn.h"
+#include "tiny-dnn/tiny_dnn/layers/layers.h"
 
 using namespace std;
 using namespace cv;

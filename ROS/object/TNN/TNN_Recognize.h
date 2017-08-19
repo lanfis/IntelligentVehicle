@@ -7,8 +7,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <vector>
-#include "TNN/tiny-dnn/tiny_dnn/tiny_dnn.h"
-#include "TNN/tiny-dnn/tiny_dnn/layers/layers.h"
+#include "tiny-dnn/tiny_dnn/tiny_dnn.h"
+#include "tiny-dnn/tiny_dnn/layers/layers.h"
 
 using namespace std;
 using namespace cv;
