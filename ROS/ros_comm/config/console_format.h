@@ -20,4 +20,33 @@
 #define LIGHTGRAY    "\033[37m"
 
 
+
+//const std::string getFunctionName(const std::string &name);
+//__PRETTY_FUNCTION__
+#define OUT_AUX(FUNC_COLOR, MSG_COLOR, STREAM, NODE, MSG) STREAM(FUNC_COLOR "[" << NODE << "] " MSG_COLOR << MSG << NO_COLOR)
+
+#define OUT_DEBUG(node, msg) OUT_AUX(BLUE, NO_COLOR, ROS_DEBUG_STREAM, node, msg)
+#define OUT_INFO(node, msg) OUT_AUX(GREEN, NO_COLOR, ROS_INFO_STREAM, node, msg)
+#define OUT_WARN(node, msg) OUT_AUX(YELLOW, YELLOW, ROS_WARN_STREAM, node, msg)
+#define OUT_ERROR(node, msg) OUT_AUX(RED, RED, ROS_ERROR_STREAM, node, msg)
+
+#else
+
+#define NO_COLOR     ""
+#define BLACK        ""
+#define RED          ""
+#define GREEN        ""
+#define YELLOW       ""
+#define BLUE         ""
+#define MAGENTA      ""
+#define CYAN         ""
+#define LIGHTGRAY    ""
+
+#define OUT_DEBUG(msg) ROS_DEBUG_STREAM(msg)
+#define OUT_INFO(msg) ROS_INFO_STREAM(msg)
+#define OUT_WARN(msg) ROS_WARN_STREAM(msg)
+#define OUT_ERROR(msg) ROS_WARN_STREAM(msg)
+
+#endif
+
 #endif

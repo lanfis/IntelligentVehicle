@@ -74,6 +74,7 @@ Face_Detector_Cascade::Face_Detector_Cascade()
   eyesplit_cascade_name = data_directory + eyesplit_cascade_name;
   smile_cascade_name = data_directory + smile_cascade_name;
   eyeglass_cascade_name = data_directory + eyeglass_cascade_name;
+  cars_cascade_name = data_directory + cars_cascade_name;
 
   if( !fullbody_cascade.load( fullbody_cascade_name ) ){ cout << "Error loading "<< fullbody_cascade_name << "\n";};
   if( !upperbody_cascade.load( upperbody_cascade_name ) ){ cout << "Error loading "<< upperbody_cascade_name << "\n";};

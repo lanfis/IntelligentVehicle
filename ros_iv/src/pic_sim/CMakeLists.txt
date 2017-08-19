@@ -215,3 +215,11 @@ add_dependencies(pic_sim_cam pic_sim_cam)
 add_executable(pic_sim_video src/pic_sim_video.cpp)
 target_link_libraries(pic_sim_video ${catkin_LIBRARIES})
 add_dependencies(pic_sim_video pic_sim_video)
+
+add_executable(pic_sim_comm src/pic_sim_comm.cpp)
+target_link_libraries(pic_sim_comm ${catkin_LIBRARIES})
+add_dependencies(pic_sim_comm pic_sim_comm)
+
+add_executable(pic_sim_com src/pic_sim_com.cpp)
+target_link_libraries(pic_sim_com ${catkin_LIBRARIES})
+add_dependencies(pic_sim_com pic_sim_com)

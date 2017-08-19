@@ -1,0 +1,8 @@
+<launch>
+  <node name="pic_sim_comm" pkg="pic_sim" type="pic_sim_comm" respawn="false" output="screen">
+      <remap from="/pic_sim_comm/link" to="/pic_sim_com/status"/>
+  </node>
+  <node name="pic_sim_com" pkg="pic_sim" type="pic_sim_com" respawn="false" output="screen">
+      <remap from="/pic_sim_com/link" to="/pic_sim_comm/status"/>
+  </node>
+</launch>

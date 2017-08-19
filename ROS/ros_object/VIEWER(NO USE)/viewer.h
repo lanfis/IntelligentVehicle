@@ -27,6 +27,8 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include "../../ros_comm/config/console_format.h"
+
 
 using namespace ros;
 using namespace std;
@@ -37,31 +39,31 @@ using namespace cv;
 class Viewer
 {
   public:
-    string nodeName;
-    string topic_image_sub;
-    string topic_image_pub;
-    string topic_activation_sub;
-    string topic_status_pub;
-    string topic_roi_sub;
+    string nodeName = "Viewer";
+    string topic_image_sub = "Viewer/image_sub";
+    string topic_image_pub = "Viewer/image";
+    string topic_activation_sub = "Viewer/activation";
+    string topic_status_pub = "Viewer/status";
+    string topic_roi_sub = "Viewer/roi_sub";
     
     string window_name = "IV Viewer";
 
   private:
     string ver_ = "1.0";
-    int queue_size;
-    bool flag_activation;
-    bool flag_image_update;
-    bool flag_window;
-    bool flag_roi_box_update;
+    int queue_size = 4;
+    bool flag_activation = true;
+    bool flag_image_update = false;
+    bool flag_window = false;
+    bool flag_roi_box_update = false;
     
     string fps_text;
     Point fps_position;
-    Scalar fps_color;
-    double fps_size;
+    Scalar fps_color = Scalar(255, 0, 0);
+    double fps_size = 0.5;
     std::chrono::time_point<std::chrono::high_resolution_clock> start, now;
     double elapsed;
     
-    int keyboard_sensity;
+    int keyboard_sensity = 50;
     
   private:
     char keyboard_read();
@@ -70,26 +72,26 @@ class Viewer
     void roi_show();
     
   private:
-    ros::AsyncSpinner spinner;
     ros::NodeHandle n_;
     image_transport::ImageTransport it_sub_;
     image_transport::ImageTransport it_pub_;
     cv_bridge::CvImagePtr cv_ptr;
-/*
+
     bool useExact = true;
+    image_transport::TransportHints hints = "raw";
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::RegionOfInterest> ExactSyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::RegionOfInterest> ApproximateSyncPolicy;
     message_filters::Synchronizer<ExactSyncPolicy> *syncExact;
     message_filters::Synchronizer<ApproximateSyncPolicy> *syncApproximate;
-    image_transport::SubscriberFilter *subImageColor, *subImageDepth;
-    subImageColor = new image_transport::SubscriberFilter(it, topicColor, queueSize, hints);
-    subImageDepth = new image_transport::SubscriberFilter(it, topicDepth, queueSize, hints);
-*/   
-    image_transport::Subscriber viewer_image_sub_;
+    
+    image_transport::SubscriberFilter viewer_image_sub_;
+    message_filters::SubscriberFilter<sensor_msgs::RegionOfInterest> viewer_roi_sub_;
+    
+    //image_transport::Subscriber viewer_image_sub_;
     image_transport::Publisher viewer_image_pub_;
     ros::Subscriber viewer_activation_sub_;
     ros::Publisher viewer_status_pub_;
-    ros::Subscriber viewer_roi_sub_;
+    //ros::Subscriber viewer_roi_sub_;
     
     void viewer_image_publish();
     void image_callBack(const sensor_msgs::ImageConstPtr& msg);
@@ -101,8 +103,8 @@ class Viewer
   public:   
     Mat image_raw;
     Mat image;
-    int image_width;
-    int image_height;
+    int image_width = 640;
+    int image_height = 480;
     vector<Rect> roi_box;
 
     string text;
@@ -112,9 +114,9 @@ class Viewer
     
     string keyboard;
     
-    bool activation;
-    bool window_activation;
-    bool fps_activation;
+    bool activation = true;
+    bool window_activation = true;
+    bool fps_activation = true;
 
   public:
     Viewer(int thread);
@@ -129,33 +131,10 @@ class Viewer
     
 };
 
-Viewer::Viewer(int thread) : it_sub_(n_), it_pub_(n_), spinner(thread)
+Viewer::Viewer(int thread) : it_sub_(n_), it_pub_(n_)
 { 
-  nodeName = "Viewer";
-  topic_image_sub = nodeName+"/image_sub";
-  topic_image_pub = nodeName+"/image";
-  topic_activation_sub = nodeName+"/activation";
-  topic_status_pub = nodeName+"/status";
-  topic_roi_sub = nodeName+"/roi_sub";
-  queue_size = 4;
-  
-  image_width = 640;
-  image_height = 480;
   cout << "-- Viewer using resolution in " << image_width << " x " << image_height << " !\n";
   fps_position = Point(0, image_height);
-  fps_color = Scalar(0, 0, 255);
-  fps_size = 0.5;
-  
-  keyboard_sensity = 50;
-  
-  activation = true;
-  fps_activation = true;
-  
-  flag_activation = true;
-  flag_image_update = false;
-  flag_roi_box_update = false;
-  window_activation = false;
-  flag_window = false;
   
   pub_init();
   pub_topic_get();
@@ -170,6 +149,14 @@ Viewer::Viewer(int thread) : it_sub_(n_), it_pub_(n_), spinner(thread)
 
 Viewer::~Viewer()
 {
+  if(useExact)
+  {
+	  delete syncExact;
+  }
+  else
+  {
+	  delete syncApproximate;
+  }
 }
 
 void Viewer::run()
@@ -360,16 +347,6 @@ void Viewer::pub_init()
 void Viewer::pub_shutdown()
 {
   viewer_image_pub_.shutdown();
-/*
-  if(useExact)
-  {
-	  delete syncExact;
-  }
-  else
-  {
-	  delete syncApproximate;
-  }
-*/
 }
 
 void Viewer::sub_topic_get()
@@ -379,20 +356,21 @@ void Viewer::sub_topic_get()
 }
 
 void Viewer::sub_init()
-{/*
+{
+  viewer_image_sub_ = image_transport::SubscriberFilter(it_sub_, topic_image_sub, queueSize, hints);
+//  viewer_image_sub_ = it_sub_.subscribe(topic_image_sub.c_str(), queue_size, &Viewer::image_callBack, this);
+  viewer_activation_sub_ = n_.subscribe(topic_activation_sub.c_str(), queue_size, &Viewer::activation_callBack, this);
+  viewer_roi_sub_ = n_.subscribe(topic_roi_sub.c_str(), queue_size, &Viewer::roi_callBack, this);
   if(useExact)
   {
-    syncExact = new message_filters::Synchronizer<ExactSyncPolicy>(ExactSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
+    syncExact = new message_filters::Synchronizer<ExactSyncPolicy>(ExactSyncPolicy(queueSize), viewer_image_sub_, viewer_roi_sub_);
     syncExact->registerCallback(boost::bind(&Viewer::image_callBack, this, _1, _2));
   }
   else
   {
-    syncApproximate = new message_filters::Synchronizer<ApproximateSyncPolicy>(ApproximateSyncPolicy(queueSize), *subImageColor, *subImageDepth, *subCameraInfoColor, *subCameraInfoDepth);
+    syncApproximate = new message_filters::Synchronizer<ApproximateSyncPolicy>(ApproximateSyncPolicy(queueSize), viewer_image_sub_, viewer_roi_sub_);
     syncApproximate->registerCallback(boost::bind(&Viewer::image_callBack, this, _1, _2));
-  }*/
-  viewer_image_sub_ = it_sub_.subscribe(topic_image_sub.c_str(), queue_size, &Viewer::image_callBack, this);
-  viewer_activation_sub_ = n_.subscribe(topic_activation_sub.c_str(), queue_size, &Viewer::activation_callBack, this);
-  viewer_roi_sub_ = n_.subscribe(topic_roi_sub.c_str(), queue_size, &Viewer::roi_callBack, this);
+  }
 }
 
 void Viewer::sub_shutdown()
