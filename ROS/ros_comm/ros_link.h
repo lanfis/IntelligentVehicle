@@ -136,11 +136,18 @@ bool ROS_Link::status_get()
 	if(msg_sub -> data == STATUS)
 	{
 	    publish(STATUS_BEGIN);
-		publish(STATUS_NODENAME + " : " + nodeName_);
-		for(int i = 0; i < control_cell_publisher.size(); i++)
-		    publish(STATUS_TOPIC + " : " + control_cell_publisher[i].topic);
-		for(int i = 0; i < control_cell_subscriber.size(); i++)
-		    publish(STATUS_TOPIC + " : " + control_cell_subscriber[i].topic);
+		string str = STATUS_NODENAME;
+		publish(str + " : " + nodeName_);
+		for(int i = 0; i < control_pub_.size(); i++)
+		{
+			str = STATUS_TOPIC;
+		    publish(str + " : " + control_pub_[i].topic);
+		}
+		for(int i = 0; i < control_sub_.size(); i++)
+		{
+			str = STATUS_TOPIC;
+		    publish(str + " : " + control_sub_[i].topic);
+		}
 		publish(STATUS_END);
 		return true;
 	}
