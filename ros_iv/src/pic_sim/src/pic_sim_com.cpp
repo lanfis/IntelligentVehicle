@@ -15,7 +15,12 @@ int main(int argc, char** argv)
   
   ROS_Link ros_link(nh, nodeName);
   ros_link.pub_init();
+  ros_link.sub_init();
   
+	string topic = "qwwqewqe";
+	int connect_port = 21;
+	ros::Publisher pub = nh.advertise<std_msgs::String>(topic.c_str(), 4);
+	ros_link.add_cell(&pub, topic, connect_port);
   /*image_transport::ImageTransport it(nh);
   image_transport::Publisher pub = it.advertise("pic_sim/image_raw", 1);
   ROS_INFO("Reading %s ...", argv[1]);

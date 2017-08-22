@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   ros::Rate loop_rate(5);
   while (nh.ok()) 
   {
-  ros_link.ping();
+//	ros_link.status();
     //pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();

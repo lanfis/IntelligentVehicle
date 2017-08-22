@@ -20,6 +20,7 @@
 #include <std_msgs/UInt16MultiArray.h>
 
 #include "../../object/CAMERA_DRIVER/Camera_Driver.h"
+#include "../../ros_comm/ros_link.h"
 
 using namespace std;
 using namespace ros;
@@ -33,6 +34,7 @@ class Camera// : public nodelet::Nodelet
     string topic_camera_info_pub = "Camera/camera_info";
     string topic_device_id_sub = "Camera/device_id";
     string topic_resolution_ratio_sub = "Camera/resolution_ratio";
+	ROS_Link *ros_link;
     
   private:
     string ver_ = "2.1";
@@ -116,6 +118,11 @@ class Camera// : public nodelet::Nodelet
       pub_topic_get();
       sub_init();
       sub_topic_get();
+
+	  ros_link = new ROS_Link(n_, nodeName);
+	  ros_link -> pub_init();
+	  ros_link -> sub_init();
+	  ros_link -> add_cell(resolution_ratio_sub_, topic_resolution_ratio_sub);
     }
     
 };
