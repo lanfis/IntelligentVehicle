@@ -4,7 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-#include "../../../../ROS/ros_comm/ros_link.h"
+#include "../../../../ROS/matrix/ros_link.h"
 
 int main(int argc, char** argv)
 {

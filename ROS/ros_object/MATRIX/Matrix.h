@@ -19,9 +19,9 @@
 #include <std_msgs/UInt16MultiArray.h>
 */
 
-#include "../../ros_comm/ros_link.h"
-#include "../../ros_comm/cell/Publisher_Cell_Float32.h"
-#include "../../ros_comm/cell/Subscriber_Cell_Float32.h"
+#include "../../matrix/ros_link.h"
+#include "../../matrix/cell/Publisher_Cell_Float32.h"
+#include "../../matrix/cell/Subscriber_Cell_Float32.h"
 
 using namespace std;
 using namespace ros;

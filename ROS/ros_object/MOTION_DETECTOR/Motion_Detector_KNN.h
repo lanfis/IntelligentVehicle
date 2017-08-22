@@ -27,7 +27,7 @@
 */
 
 #include "../../object/MOTION/Motion_KNN.h"
-#include "../../ros_comm/config/console_format.h"
+#include "../../matrix/config/console_format.h"
 
 using namespace std;
 using namespace ros;
