@@ -18,6 +18,7 @@
 #include <std_msgs/MultiArrayLayout.h>
 #include <std_msgs/UInt16MultiArray.h>
 
+#include "../../matrix/ros_link.h"
 
 using namespace std;
 using namespace ros;
@@ -37,6 +38,7 @@ class Camera_Focus// : public nodelet::Nodelet
   private:
     string ver_ = "1.1";
     int queue_size = 4;
+	ROS_Link *ros_link;
     
     ros::NodeHandle n_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
@@ -113,6 +115,11 @@ class Camera_Focus// : public nodelet::Nodelet
       pub_topic_get();
       //sub_init();
       //sub_topic_get();
+	  ros_link = new ROS_Link(n_, nodeName);
+	  ros_link -> pub_init();
+	  ros_link -> sub_init();
+	  ros_link -> add_cell(roi_ratio_sub_, topic_image_roi_ratio_sub);
+	  ros_link -> add_cell(roi_resolution_sub_, topic_image_roi_resolution_sub);
     }
     
 };

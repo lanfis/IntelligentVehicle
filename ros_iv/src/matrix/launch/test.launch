@@ -1,5 +1,6 @@
 <launch>
   <node name="matrix_node" pkg="matrix" type="matrix_node" respawn="false" output="screen">
       <remap from="/Matrix/link/0" to="/Camera/status"/>
+      <remap from="/Matrix/link/1" to="/Camera_Focus/status"/>
   </node>
 </launch>

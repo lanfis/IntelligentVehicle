@@ -34,11 +34,11 @@ class Camera// : public nodelet::Nodelet
     string topic_camera_info_pub = "Camera/camera_info";
     string topic_device_id_sub = "Camera/device_id";
     string topic_resolution_ratio_sub = "Camera/resolution_ratio";
-	ROS_Link *ros_link;
     
   private:
     string ver_ = "2.1";
     int queue_size = 4;
+	ROS_Link *ros_link;
     
     ros::NodeHandle n_;
     boost::shared_ptr<image_transport::ImageTransport> it_;

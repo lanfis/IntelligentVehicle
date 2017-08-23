@@ -27,6 +27,7 @@ using namespace std;
 using namespace ros;
 
 #define LINK_SIZE 2
+#define CELL_SIZE LINK_SIZE*2
 #define UPDATE_CYCLE 128
 #define UPDATE_DURATION 1000
 
@@ -48,18 +49,21 @@ class Matrix
 	private:
 		ROS_Link **link_;
 /*		Publisher_Cell_Float32 **cell_pub_;
-		int size_cell_pub_ = 0;
+		int size_cell_pub__ = 0;
 		Subscriber_Cell_Float32 **cell_sub_;
-		int size_cell_sub_ = 0;*/
+		int size_cell_sub__ = 0;*/
 
-		vector< Publisher_Cell_Float32 > cell_pub_;
-		vector< Subscriber_Cell_Float32 > cell_sub_;
-		vector< boost::shared_ptr< std_msgs::Float32 > > msg_cell_sub_;
+		int size_cell_pub_ = 0;
+		int size_cell_sub_ = 0;
+		Publisher_Cell_Float32 cell_pub_[CELL_SIZE];
+		Subscriber_Cell_Float32 cell_sub_[CELL_SIZE];
+		boost::shared_ptr< std_msgs::Float32 > msg_cell_pub_[CELL_SIZE];
+		boost::shared_ptr< std_msgs::Float32 > msg_cell_sub_[CELL_SIZE];
 
 	private:
 		bool add_cell_pub(string topic);
 		bool add_cell_sub(string topic);
-		bool erase_cell(string& topic);
+//		bool erase_cell(string& topic);
 		bool search_cell_pub(string& topic);
 		bool search_cell_sub(string& topic);
 		bool search_cell_pub(string& topic, int& idx);
@@ -72,7 +76,6 @@ class Matrix
 	    Matrix(ros::NodeHandle& nh);
 	    ~Matrix();
 		void construct_cell_to_link();
-		void destory_cell_to_link();
 	    void check_link();
 	    void update_link();
 	    void run();
@@ -113,10 +116,10 @@ Matrix::~Matrix()
 	for(int i = 0; i < LINK_SIZE; i++)
 		delete link_[i];
 	delete [] link_;
-/*	for(int i = 0; i < size_cell_pub_; i++)
+/*	for(int i = 0; i < size_cell_pub__; i++)
 		delete cell_pub_[i];
 	delete [] cell_pub_;
-	for(int i = 0; i < size_cell_sub_; i++)
+	for(int i = 0; i < size_cell_sub__; i++)
 		delete cell_sub_[i];
 	delete [] cell_sub_;*/
 }
@@ -143,20 +146,13 @@ void Matrix::construct_cell_to_link()
 {
 	for(int i = 0; i < LINK_SIZE; i++)
 	{
-		int size_link_pub = link_[i] -> get_link_pub_size();
-		int size_link_sub = link_[i] -> get_link_sub_size();
-		for(int j = 0; j < size_link_sub; j++)
+//		int size_link_pub = link_[i] -> get_link_pub_size();
+//		int size_link_sub = link_[i] -> get_link_sub_size();
+		for(int j = 0; j < link_[i] -> get_link_pub_size(); j++)
 			add_cell_pub(link_[i] -> get_link_sub_topic(j));
-		for(int j = 0; j < size_link_pub; j++)
+		for(int j = 0; j < link_[i] -> get_link_sub_size(); j++)
 			add_cell_sub(link_[i] -> get_link_pub_topic(j));
 	}
-}
-
-void Matrix::destory_cell_to_link()
-{
-	cell_pub_.clear();
-	cell_sub_.clear();
-	msg_cell_sub_.clear();
 }
 
 void Matrix::check_link()
@@ -176,23 +172,23 @@ void Matrix::update_link()
 bool Matrix::add_cell_pub(string topic)
 {
 	if(search_cell_pub(topic)) return false;
-	Publisher_Cell_Float32 new_cell_pub(n_);
-	cell_pub_.push_back(new_cell_pub);
-	cell_pub_[cell_pub_.size()-1].init(topic, this -> queue_size_pub_);
+	cell_pub_[size_cell_pub_].init(n_, topic, this -> queue_size_pub_, msg_cell_pub_[size_cell_pub_]);
+	size_cell_pub_ += 1;
+	for(int i = 0; i < size_cell_pub_; i++)
+		cout << cell_pub_[i].getTopic() << endl;
 	return true;
 }
 
 bool Matrix::add_cell_sub(string topic)
 {
 	if(search_cell_sub(topic)) return false;
-	boost::shared_ptr< std_msgs::Float32 > new_msg;
-	msg_cell_sub_.push_back(new_msg);
-	Subscriber_Cell_Float32 new_cell_sub(n_);
-	cell_sub_.push_back(new_cell_sub);
-	cell_sub_[cell_sub_.size()-1].init(topic, this -> queue_size_sub_, msg_cell_sub_[msg_cell_sub_.size()-1]);
+	cell_sub_[size_cell_sub_].init(n_, topic, this -> queue_size_sub_, msg_cell_sub_[size_cell_sub_]);
+	size_cell_sub_ += 1;
+	for(int i = 0; i < size_cell_sub_; i++)
+		cout << cell_sub_[i].getTopic() << endl;
 	return true;
 }
-
+/*
 bool Matrix::erase_cell(string& topic)
 {
 	int idx = 0;
@@ -223,10 +219,10 @@ bool Matrix::erase_cell(string& topic)
 	}
 	return false;
 }
-
+*/
 bool Matrix::search_cell_pub(string& topic)
 {
-	for(int idx = 0; idx < cell_pub_.size(); idx++)
+	for(int idx = 0; idx < size_cell_pub_; idx++)
 		if(cell_pub_[idx].getTopic() == topic)
 			return true;
 	return false;
@@ -234,7 +230,7 @@ bool Matrix::search_cell_pub(string& topic)
 
 bool Matrix::search_cell_sub(string& topic)
 {
-	for(int idx = 0; idx < cell_sub_.size(); idx++)
+	for(int idx = 0; idx < size_cell_sub_; idx++)
 		if(cell_sub_[idx].getTopic() == topic)
 			return true;
 	return false;
@@ -242,7 +238,7 @@ bool Matrix::search_cell_sub(string& topic)
 
 bool Matrix::search_cell_pub(string& topic, int& idx)
 {
-	for(idx = 0; idx < cell_pub_.size(); idx++)
+	for(int idx = 0; idx < size_cell_pub_; idx++)
 		if(cell_pub_[idx].getTopic() == topic)
 			return true;
 	return false;
@@ -250,7 +246,7 @@ bool Matrix::search_cell_pub(string& topic, int& idx)
 
 bool Matrix::search_cell_sub(string& topic, int& idx)
 {
-	for(idx = 0; idx < cell_sub_.size(); idx++)
+	for(int idx = 0; idx < size_cell_sub_; idx++)
 		if(cell_sub_[idx].getTopic() == topic)
 			return true;
 	return false;
