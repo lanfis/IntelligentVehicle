@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _MSER_DETECTOR_H_
-#define _MSER_DETECTOR_H_
+#ifndef _MSER_H_
+#define _MSER_H_
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-class MSERDetector
+class MSER
 {
   private:
     #define MSER_DELTA  5;
@@ -26,10 +26,10 @@ class MSERDetector
     #define MSER_MIN_WINDOW_RATIO  0.05;
     #define MSER_MAX_WINDOW_RATIO  0.1;
       
-    int min_width_;
-    int min_height_;
-    int max_width_;
-    int max_height_;
+    int min_width_ = MSER_MIN_WIDTH;
+    int min_height_ = MSER_MIN_HEIGHT;
+    int max_width_ = MSER_MAX_WIDTH;
+    int max_height_ = MSER_MAX_HEIGHT;
     void para_adjust(Mat& image);
     void detect(Mat& image, vector< vector< Point> >& contours_, vector< Rect>& bboxes_);
     
@@ -39,56 +39,43 @@ class MSERDetector
     vector< float> bboxes_angle;
     vector< Point2f> bboxes_center;
     vector< Size2f> bboxes_size;
-    int delta;
-    int min_width;
-    int min_height;
-    int max_width;
-    int max_height;
-    double max_variation;
-    double max_diversity;
-    int max_evolution;
-    double area_threshold;
-    double min_margin;
-    int edge_blur_size;
-    double min_window_ratio;
-    double max_window_ratio;
+    int delta = MSER_DELTA;
+    int min_width = MSER_MIN_WIDTH;
+    int min_height = MSER_MIN_HEIGHT;
+    int max_width = MSER_MAX_WIDTH;
+    int max_height = MSER_MAX_HEIGHT;
+    double max_variation = MSER_MAX_VARIATION;
+    double max_diversity = MSER_MAX_DIVERSITY;
+    int max_evolution = MSER_MAX_EVOLUTION;
+    double area_threshold = MSER_AREA_THRESHOLD;
+    double min_margin = MSER_MIN_MARGIN;
+    int edge_blur_size = MSER_EDGE_BLUR_SIZE;
+    double min_window_ratio = MSER_MIN_WINDOW_RATIO;
+    double max_window_ratio = MSER_MIN_WINDOW_RATIO;
 
   public:
-    MSERDetector();
-    ~MSERDetector();
+    MSER();
+    ~MSER();
     void init();
     void region_detect(Mat& image);//, vector< vector< Point> >& contours, vector< Rect>& bboxes, vector< Point2f>& center, vector< float>& angle, vector< Size2f>& size);
     void draw(Mat& image, Scalar color);
 };
 
 
-MSERDetector::MSERDetector()
-{
-  delta = MSER_DELTA;
-  min_width_ = min_width = MSER_MIN_WIDTH;
-  min_height_ = min_height = MSER_MIN_HEIGHT;
-  max_width_ = max_width = MSER_MAX_WIDTH;
-  max_height_ = max_height = MSER_MAX_HEIGHT;
-  max_variation = MSER_MAX_VARIATION;
-  max_diversity = MSER_MAX_DIVERSITY;
-  max_evolution = MSER_MAX_EVOLUTION;
-  area_threshold = MSER_AREA_THRESHOLD;
-  min_margin = MSER_MIN_MARGIN;
-  edge_blur_size = MSER_EDGE_BLUR_SIZE;
-  min_window_ratio = MSER_MIN_WINDOW_RATIO;
-  max_window_ratio = MSER_MAX_WINDOW_RATIO;
-}
-
-MSERDetector::~MSERDetector()
+MSER::MSER()
 {
 }
 
-void MSERDetector::init()
+MSER::~MSER()
+{
+}
+
+void MSER::init()
 {
   //para_adjust();
 }
 
-void MSERDetector::para_adjust(Mat& image)
+void MSER::para_adjust(Mat& image)
 {
   int image_width = image.cols;
   int image_height = image.rows;
@@ -98,7 +85,7 @@ void MSERDetector::para_adjust(Mat& image)
   max_height_ = (max_height < image_height * max_window_ratio)? max_height : image_height * max_window_ratio;
 }
 
-void MSERDetector::region_detect(Mat& image)/*
+void MSER::region_detect(Mat& image)/*
                                 , vector< vector< Point> >& contours
                                 , vector< Rect>& bboxes 
                                 , vector< Point2f>& center
@@ -122,7 +109,7 @@ void MSERDetector::region_detect(Mat& image)/*
   return;
 }
 
-void MSERDetector::detect(Mat& image, vector< vector< Point> >& contours, vector< Rect>& bboxes)
+void MSER::detect(Mat& image, vector< vector< Point> >& contours, vector< Rect>& bboxes)
 {
   int min_area = min_width_ * min_height_;
   int max_area = max_width_ * max_height_;
@@ -153,7 +140,7 @@ void MSERDetector::detect(Mat& image, vector< vector< Point> >& contours, vector
   }
 }
 
-void MSERDetector::draw(Mat& image, Scalar color)
+void MSER::draw(Mat& image, Scalar color)
 {
   bboxes_angle.clear();
   bboxes_center.clear();

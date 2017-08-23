@@ -203,6 +203,7 @@ void Camera_Focus::roi_resolution_callBack(const std_msgs::Float32::ConstPtr& ms
 {
     ROS_INFO("Resolution ratio is changed to %f !", msg -> data);
     image_roi_resolution = (msg -> data > 1.0)? 1.0 : msg -> data;
+    image_roi_resolution = (image_roi_resolution < 0.0)? 0.0 : image_roi_resolution;
 }
 
 void Camera_Focus::pub_topic_get()

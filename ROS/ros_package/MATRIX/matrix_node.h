@@ -38,10 +38,10 @@ class Matrix_Node
 
 Matrix_Node::Matrix_Node(ros::NodeHandle& n, int thread) : n_(n), spinner(thread)
 {
-    spinner.start();
 	mat_node = new Matrix(n_);
 	mat_node -> init();
     run();
+    spinner.start();
 }
 
 Matrix_Node::~Matrix_Node()

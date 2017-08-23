@@ -258,9 +258,9 @@ void Image_Tracker::kcft_track_publish()
 void Image_Tracker::tracker_roi_callBack(const sensor_msgs::RegionOfInterest::ConstPtr& msg)
 {
     ROS_INFO("Image_Tracker kcft_roi is changed to x= %d, y= %d, width= %d, height= %d !", msg -> x_offset, msg -> y_offset, msg -> width, msg -> height);
-    kcft_roi.x = (msg -> x_offset - msg -> width/2 < 0)? 0 : msg -> x_offset - msg -> width/2;
+    kcft_roi.x = (msg -> x_offset - msg -> width/2 < 0 )? 0 : msg -> x_offset - msg -> width/2;
     kcft_roi.y = (msg -> y_offset - msg -> height/2 < 0)? 0 : msg -> y_offset - msg -> height/2;
-    kcft_roi.width = (msg -> x_offset + msg -> width/2 > image.cols)? image.cols - kcft_roi.x : msg -> x_offset + msg -> width/2 - kcft_roi.x;
+    kcft_roi.width =  (msg -> x_offset + msg -> width/2 > image.cols )? image.cols - kcft_roi.x : msg -> x_offset + msg -> width/2  - kcft_roi.x;
     kcft_roi.height = (msg -> y_offset + msg -> height/2 > image.rows)? image.rows - kcft_roi.y : msg -> y_offset + msg -> height/2 - kcft_roi.y;
     flag_kcft_init = false;
 }

@@ -26,13 +26,15 @@
 using namespace std;
 using namespace ros;
 
-#define LINK_SIZE 2
-#define CELL_SIZE LINK_SIZE*2
-#define UPDATE_CYCLE 128
-#define UPDATE_DURATION 1000
 
 class Matrix
 {    
+	private:
+		#define LINK_SIZE 4
+		#define CELL_SIZE LINK_SIZE*2
+		#define UPDATE_CYCLE 128
+		#define UPDATE_DURATION 1000
+
 	public:
 	    string nodeName_ = "Matrix";
     
@@ -68,7 +70,6 @@ class Matrix
 		bool search_cell_sub(string& topic);
 		bool search_cell_pub(string& topic, int& idx);
 		bool search_cell_sub(string& topic, int& idx);
-//		float ratio = 0;
     
 	private:
 
@@ -148,9 +149,9 @@ void Matrix::construct_cell_to_link()
 	{
 //		int size_link_pub = link_[i] -> get_link_pub_size();
 //		int size_link_sub = link_[i] -> get_link_sub_size();
-		for(int j = 0; j < link_[i] -> get_link_pub_size(); j++)
-			add_cell_pub(link_[i] -> get_link_sub_topic(j));
 		for(int j = 0; j < link_[i] -> get_link_sub_size(); j++)
+			add_cell_pub(link_[i] -> get_link_sub_topic(j));
+		for(int j = 0; j < link_[i] -> get_link_pub_size(); j++)
 			add_cell_sub(link_[i] -> get_link_pub_topic(j));
 	}
 }
@@ -174,8 +175,6 @@ bool Matrix::add_cell_pub(string topic)
 	if(search_cell_pub(topic)) return false;
 	cell_pub_[size_cell_pub_].init(n_, topic, this -> queue_size_pub_, msg_cell_pub_[size_cell_pub_]);
 	size_cell_pub_ += 1;
-	for(int i = 0; i < size_cell_pub_; i++)
-		cout << cell_pub_[i].getTopic() << endl;
 	return true;
 }
 
@@ -184,8 +183,6 @@ bool Matrix::add_cell_sub(string topic)
 	if(search_cell_sub(topic)) return false;
 	cell_sub_[size_cell_sub_].init(n_, topic, this -> queue_size_sub_, msg_cell_sub_[size_cell_sub_]);
 	size_cell_sub_ += 1;
-	for(int i = 0; i < size_cell_sub_; i++)
-		cout << cell_sub_[i].getTopic() << endl;
 	return true;
 }
 /*

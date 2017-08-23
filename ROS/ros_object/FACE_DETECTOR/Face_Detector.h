@@ -85,7 +85,7 @@ class Face_Detector
         {
           sub_init();
           flag_image_face = true;//extra parameter
-          flag_image_cars = true;//extra parameter
+//          flag_image_cars = true;//extra parameter
         }
       }
     }
@@ -97,7 +97,7 @@ class Face_Detector
       {
         flag_face_image = false;
         flag_image_face = false;//extra parameter
-        flag_image_cars = false;//extra parameter
+//        flag_image_cars = false;//extra parameter
         if(!(flag_image_face | flag_image_fullbody | flag_image_cars))
         {
           sub_shutdown();
