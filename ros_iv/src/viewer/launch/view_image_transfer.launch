@@ -1,0 +1,6 @@
+<launch>
+  <node name="viewer" pkg="viewer" type="viewer" respawn="false" output="screen">
+    <remap from="Viewer/image_sub" to="/Camera/image"/>
+    <remap from="Viewer/image/compressed" to="/compressed_image"/>
+  </node>
+</launch>
