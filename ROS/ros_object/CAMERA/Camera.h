@@ -20,7 +20,7 @@
 #include <std_msgs/UInt16MultiArray.h>
 
 #include "../../object/CAMERA_DRIVER/Camera_Driver.h"
-#include "../../matrix/ros_link.h"
+#include "../../matrix/MATRIX_LINK.h"
 
 using namespace std;
 using namespace ros;

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _MATRIX_NODE_H_
-#define _MATRIX_NODE_H_
+#ifndef _PLATFORM_H_
+#define _PLATFORM_H_
 
 #include <ros/ros.h>
 #include <ros/spinner.h>
@@ -16,42 +16,42 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
 
-#include "../../matrix/Matrix.h"
+#include "../../ros_object/PLATFORM_CONTROL/platform_control.h"
 
 using namespace std;
 using namespace cv;
 
 
-class Matrix_Node
+class Platform
 {
     private:
       string ver_ = "1.1";
       ros::AsyncSpinner spinner;
       ros::NodeHandle n_;
-	  Matrix *mat_node;
+	  Platform_Control *pc;
 	  
     public:
-      Matrix_Node(ros::NodeHandle& n, int thread);
-      ~Matrix_Node();
+      Platform(ros::NodeHandle& n, int thread);
+      ~Platform();
       void run();
 };
 
-Matrix_Node::Matrix_Node(ros::NodeHandle& n, int thread) : n_(n), spinner(thread)
+Platform::Platform(ros::NodeHandle& n, int thread) : n_(n), spinner(thread)
 {
-	mat_node = new Matrix(n_);
-	mat_node -> init();
+	pc = new Platform_Control(n_);
+	pc -> init();
     run();
     spinner.start();
 }
 
-Matrix_Node::~Matrix_Node()
+Platform::~Platform()
 {
-	delete mat_node;
+	delete pc;
 }
 
-void Matrix_Node::run()
+void Platform::run()
 {
-	mat_node -> run();
+	pc -> run();
 }
 
 
